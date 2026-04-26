@@ -1,0 +1,4672 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily OS — Your Personal Discipline OS</title>
+  <meta name="description" content="Daily OS — Track your focus, habits, and discipline across career, physical, and spiritual pillars." />
+  <meta name="theme-color" content="#080808" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔱</text></svg>" />
+
+  <!-- Fonts -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+
+  <!-- Supabase CDN -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* ─────────────────────────────────────────
+       DESIGN TOKENS
+    ───────────────────────────────────────── */
+    :root {
+      --bg:      #080808;
+      --bg2:     #0e0e12;
+      --bg3:     #14141a;
+      --bg4:     #1c1c24;
+      --bg5:     #24242e;
+
+      --accent:       #a8a8bc;
+      --accent-light: #c8c8d8;
+      --accent-dim:   #787888;
+      --accent-glow:  rgba(168,168,188,0.10);
+      --accent-glow2: rgba(168,168,188,0.05);
+
+      --career:   #a8a8bc;
+      --physical: #5cb87a;
+      --spiritual:#9b8fd4;
+
+      --text:  #e8e8ec;
+      --text2: #9090a0;
+      --text3: #52525e;
+      --text4: #2a2a36;
+
+      --border:  rgba(255,255,255,0.05);
+      --border2: rgba(255,255,255,0.09);
+      --border3: rgba(255,255,255,0.15);
+
+      --green:  #5cb87a;
+      --red:    #c87070;
+      --yellow: #c8a84a;
+
+      --space-xs:  4px;
+      --space-sm:  8px;
+      --space-md:  16px;
+      --space-lg:  24px;
+      --space-xl:  32px;
+      --space-2xl: 48px;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --radius-full: 9999px;
+
+      --shadow-sm:   0 1px 4px rgba(0,0,0,0.5);
+      --shadow-md:   0 4px 20px rgba(0,0,0,0.4);
+      --shadow-lg:   0 8px 48px rgba(0,0,0,0.6);
+      --shadow-glow: 0 0 20px rgba(168,168,188,0.08);
+    }
+
+    /* ─────────────────────────────────────────
+       RESET & BASE
+    ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background: var(--bg);
+      color: var(--text);
+    }
+    input, button, textarea, select { font-family: inherit; font-size: inherit; }
+    button { cursor: pointer; border: none; background: none; }
+
+    /* ─────────────────────────────────────────
+       LOADING SCREEN
+    ───────────────────────────────────────── */
+    #loading-screen {
+      position: fixed; inset: 0; z-index: 1000;
+      background: var(--bg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: var(--space-lg);
+      transition: opacity 0.4s ease, pointer-events 0s 0.4s;
+    }
+    #loading-screen.hidden { opacity: 0; pointer-events: none; }
+    .loading-brand { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text2); letter-spacing: -0.3px; }
+    .loading-dots  { display: flex; gap: 6px; align-items: center; }
+    .loading-dot   { width: 6px; height: 6px; border-radius: var(--radius-full); background: var(--accent-dim); animation: pulse-dot 1.2s ease-in-out infinite; }
+    .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse-dot {
+      0%, 80%, 100% { opacity: 0.2; transform: scale(0.85); }
+      40%           { opacity: 1;   transform: scale(1); }
+    }
+
+    /* ─────────────────────────────────────────
+       AUTH SCREEN
+    ───────────────────────────────────────── */
+    #auth-screen {
+      position: fixed; inset: 0; z-index: 900;
+      background: var(--bg);
+      background-image: radial-gradient(ellipse at 50% 40%, rgba(168,168,188,0.03) 0%, transparent 70%);
+      display: flex; align-items: center; justify-content: center;
+      padding: var(--space-md);
+      transition: opacity 0.3s ease;
+    }
+    #auth-screen.hidden { opacity: 0; pointer-events: none; }
+    .auth-card {
+      width: 100%; max-width: 400px;
+      background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius-xl);
+      padding: 40px 36px; position: relative; overflow: hidden;
+    }
+    .auth-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(168,168,188,0.2), transparent);
+    }
+    .auth-logo    { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--text); text-align: center; margin-bottom: 6px; letter-spacing: -0.3px; }
+    .auth-tagline { font-size: 13px; color: var(--text3); text-align: center; margin-bottom: 32px; }
+    .auth-mode-toggle {
+      display: flex; gap: var(--space-xs); margin-bottom: var(--space-lg);
+      background: var(--bg3); border-radius: var(--radius-sm); padding: 3px;
+    }
+    .auth-mode-btn {
+      flex: 1; padding: 8px 12px; border-radius: calc(var(--radius-sm) - 2px);
+      font-size: 13px; font-weight: 500; text-align: center;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      color: var(--text3); background: transparent; border: 1px solid transparent;
+    }
+    .auth-mode-btn.active { background: var(--bg4); color: var(--text); border-color: var(--border2); }
+    .auth-form { display: flex; flex-direction: column; gap: var(--space-sm); }
+    .auth-input {
+      width: 100%; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 12px 16px; color: var(--text); font-size: 14px;
+      outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .auth-input::placeholder { color: var(--text3); }
+    .auth-input:focus { border-color: var(--accent-dim); box-shadow: 0 0 0 3px var(--accent-glow2); }
+    .auth-name-field { transition: opacity 0.2s ease, max-height 0.25s ease; overflow: hidden; max-height: 0; opacity: 0; }
+    .auth-name-field.visible { max-height: 60px; opacity: 1; }
+    .auth-submit-btn {
+      width: 100%; background: var(--bg4); border: 1px solid var(--border3);
+      color: var(--text); font-size: 14px; font-weight: 600; padding: 13px;
+      border-radius: var(--radius-sm); margin-top: var(--space-xs);
+      transition: border-color 0.2s ease, color 0.2s ease; letter-spacing: 0.1px;
+    }
+    .auth-submit-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent-light); }
+    .auth-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .auth-error { font-size: 12px; color: var(--red); text-align: center; min-height: 18px; margin-top: var(--space-xs); }
+
+    /* ─────────────────────────────────────────
+       APP SHELL
+    ───────────────────────────────────────── */
+    #app { display: none; min-height: 100vh; }
+    #app.visible { display: block; }
+
+    /* ─────────────────────────────────────────
+       DESKTOP NAV
+    ───────────────────────────────────────── */
+    .nav-desktop {
+      position: sticky; top: 0; z-index: 200; height: 54px;
+      background: rgba(8,8,8,0.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 var(--space-xl);
+    }
+    .nav-brand {
+      font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--text);
+      white-space: nowrap; padding-right: var(--space-xl); margin-right: var(--space-md);
+      border-right: 1px solid var(--border2); letter-spacing: -0.2px;
+    }
+    .nav-tabs { display: flex; align-items: center; flex: 1; }
+    .nav-tab {
+      height: 54px; padding: 0 18px; font-size: 13px; font-weight: 500; color: var(--text3);
+      border-bottom: 2px solid transparent; transition: color 0.2s ease, border-bottom-color 0.2s ease;
+      white-space: nowrap; display: flex; align-items: center;
+    }
+    .nav-tab:hover  { color: var(--text2); }
+    .nav-tab.active { color: var(--text); border-bottom-color: var(--accent-dim); }
+    .nav-right { display: flex; align-items: center; gap: var(--space-md); margin-left: auto; }
+    .sync-pill {
+      display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500;
+      color: var(--text3); background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-full); padding: 4px 10px; white-space: nowrap;
+    }
+    .sync-dot { width: 5px; height: 5px; border-radius: var(--radius-full); background: var(--text4); flex-shrink: 0; }
+    .sync-pill.synced  .sync-dot { background: var(--green); }
+    .sync-pill.syncing .sync-dot { background: var(--accent); animation: sync-pulse 1s ease-in-out infinite; }
+    .sync-pill.error   .sync-dot { background: var(--red); }
+    @keyframes sync-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .nav-user-email { font-size: 12px; color: var(--text3); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .nav-logout-btn {
+      font-size: 11px; font-weight: 500; color: var(--text3);
+      padding: 5px 12px; border: 1px solid var(--border2); border-radius: var(--radius-sm);
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+    .nav-logout-btn:hover { color: var(--red); border-color: var(--red); }
+
+    /* ─────────────────────────────────────────
+       MOBILE NAV
+    ───────────────────────────────────────── */
+    .nav-mobile {
+      display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+      height: 64px; background: rgba(8,8,8,0.97);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom);
+    }
+    .nav-mobile-inner { display: flex; align-items: center; justify-content: space-around; height: 100%; }
+    .nav-mobile-tab {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 3px; flex: 1; height: 100%; color: var(--text3);
+      font-size: 10px; font-weight: 500; transition: color 0.2s ease;
+    }
+    .nav-mobile-tab.active { color: var(--accent); }
+    .nav-mobile-icon { font-size: 20px; line-height: 1; }
+
+    /* ─────────────────────────────────────────
+       PAGE CONTAINER
+    ───────────────────────────────────────── */
+    .page-container { max-width: 980px; margin: 0 auto; padding: 36px 28px 120px; }
+    .page { display: none; animation: page-fade-in 0.15s ease; }
+    .page.active { display: block; }
+    @keyframes page-fade-in { from { opacity: 0; } to { opacity: 1; } }
+    .page-heading { font-family: 'DM Serif Display', serif; font-size: 30px; color: var(--text); letter-spacing: -0.5px; margin-bottom: 6px; }
+    .page-tagline { font-size: 13px; color: var(--text3); margin-bottom: 32px; }
+
+    /* ─────────────────────────────────────────
+       TOAST SYSTEM
+    ───────────────────────────────────────── */
+    #toast-container {
+      position: fixed; z-index: 500; display: flex; flex-direction: column;
+      gap: var(--space-sm); bottom: 32px; right: 24px; max-width: 320px; pointer-events: none;
+    }
+    .toast {
+      background: var(--bg4); border: 1px solid var(--border2); border-radius: var(--radius-md);
+      padding: 12px 20px; font-size: 13px; color: var(--text); box-shadow: var(--shadow-md);
+      border-left: 3px solid var(--accent); pointer-events: auto;
+      animation: toast-in-desktop 0.25s ease; transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .toast.success { border-left-color: var(--green); }
+    .toast.error   { border-left-color: var(--red); }
+    .toast.info    { border-left-color: var(--accent); }
+    .toast.removing { opacity: 0; transform: translateX(8px); }
+    @keyframes toast-in-desktop { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+
+    /* ═══════════════════════════════════════════
+       TODAY PAGE — STAGE 2 STYLES
+    ═══════════════════════════════════════════ */
+
+    /* ── Hero ── */
+    .today-hero { padding: 32px 0 36px 0; }
+
+    .today-date-line {
+      font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--text3); margin-bottom: 12px;
+    }
+    .today-greeting {
+      font-family: 'DM Serif Display', serif; font-size: 36px;
+      letter-spacing: -0.5px; color: var(--text); line-height: 1.15; margin-bottom: 16px;
+    }
+    .today-streak {
+      font-size: 13px; color: var(--accent); font-weight: 500;
+      margin-bottom: 28px; display: block;
+    }
+    .today-intention-label {
+      font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase;
+      color: var(--text3); margin-bottom: 8px;
+    }
+    .today-intention-input {
+      background: transparent; border: none; border-bottom: 1px solid var(--border2);
+      border-radius: 0; padding: 10px 0; font-size: 16px; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-weight: 300; width: 100%;
+      outline: none; transition: border-bottom-color 0.2s ease;
+    }
+    .today-intention-input::placeholder { color: var(--text3); }
+    .today-intention-input:focus { border-bottom-color: var(--accent-dim); }
+    .today-intention-saved {
+      font-size: 11px; color: var(--text3); margin-top: 6px;
+      opacity: 0; transition: opacity 0.3s ease; display: block; height: 16px;
+    }
+    .today-intention-saved.visible { opacity: 1; }
+
+    /* ── Metrics Row ── */
+    .today-metrics {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 10px; margin-bottom: 32px;
+    }
+    .metric-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 18px 16px;
+      transition: border-color 0.2s ease;
+    }
+    .metric-card:hover { border-color: var(--border2); }
+    .metric-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text3); margin-bottom: 6px;
+    }
+    .metric-value {
+      font-family: 'DM Serif Display', serif; font-size: 28px;
+      color: var(--text); letter-spacing: -0.5px; line-height: 1;
+    }
+    .metric-value.all-done { color: var(--green); }
+    .metric-value--md { font-size: 20px; }
+    .metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+    /* ── Pillar Cards ── */
+    .pillar-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 24px; margin-bottom: 12px;
+      transition: box-shadow 0.35s ease, border-color 0.35s ease;
+    }
+    .pillar-card.win-state {
+      box-shadow: 0 0 0 1px rgba(168,168,188,0.15), 0 4px 24px rgba(168,168,188,0.04);
+      border-color: rgba(168,168,188,0.12);
+    }
+    .pillar-header { display: flex; align-items: center; justify-content: space-between; }
+    .pillar-header-left { display: flex; align-items: center; gap: 10px; }
+    .pillar-dot { width: 9px; height: 9px; border-radius: var(--radius-full); flex-shrink: 0; }
+    .pillar-dot.career   { background: var(--career); }
+    .pillar-dot.physical { background: var(--physical); }
+    .pillar-dot.spiritual{ background: var(--spiritual); }
+    .pillar-name { font-weight: 600; font-size: 15px; color: var(--text); }
+    .pillar-badge {
+      font-size: 11px; font-weight: 500; padding: 3px 10px;
+      border-radius: var(--radius-full); background: var(--bg3);
+      border: 1px solid var(--border); color: var(--text3);
+      transition: color 0.25s ease, border-color 0.25s ease; white-space: nowrap;
+    }
+    .pillar-badge.win { color: var(--green); border-color: rgba(92,184,122,0.2); }
+    .pillar-divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+    /* ── Checklist Items ── */
+    .checklist-item {
+      display: flex; align-items: center; gap: 12px;
+      min-height: 44px; padding: 8px 0;
+      border-bottom: 1px solid var(--border); cursor: pointer;
+      user-select: none;
+    }
+    .checklist-item:last-of-type { border-bottom: none; }
+    .check-box {
+      width: 20px; height: 20px; min-width: 20px; border-radius: 5px;
+      border: 1.5px solid var(--border3); background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s ease, border-color 0.2s ease; flex-shrink: 0;
+    }
+    .check-box svg { opacity: 0; transition: opacity 0.15s ease; }
+    .checklist-item.checked .check-box { background: var(--accent-dim); border-color: var(--accent-dim); }
+    .checklist-item.checked .check-box svg { opacity: 1; }
+    .check-label { font-size: 13px; color: var(--text); line-height: 1.4; transition: color 0.2s ease, opacity 0.2s ease; flex: 1; }
+    .checklist-item.checked .check-label { text-decoration: line-through; color: var(--text3); opacity: 0.6; }
+
+    /* ── Pillar Notes ── */
+    .pillar-notes-label {
+      font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text3); margin-bottom: 4px; margin-top: 16px;
+    }
+    .pillar-notes-textarea {
+      background: transparent; border: none; border-bottom: 1px solid var(--border);
+      border-radius: 0; width: 100%; resize: none; min-height: 44px;
+      font-size: 13px; color: var(--text2); font-family: 'DM Sans', sans-serif;
+      outline: none; padding: 8px 0; line-height: 1.6;
+      transition: border-bottom-color 0.2s ease;
+    }
+    .pillar-notes-textarea::placeholder { color: var(--text3); }
+    .pillar-notes-textarea:focus { border-bottom-color: var(--accent-dim); }
+
+    /* ── Habit Card ── */
+    .habit-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 24px; margin-bottom: 12px;
+      transition: box-shadow 0.35s ease, border-color 0.35s ease;
+    }
+    .habit-card.win-state {
+      box-shadow: 0 0 0 1px rgba(168,168,188,0.15), 0 4px 24px rgba(168,168,188,0.04);
+      border-color: rgba(168,168,188,0.12);
+    }
+    .habit-header { display: flex; align-items: center; justify-content: space-between; }
+    .habit-title { font-weight: 600; font-size: 15px; color: var(--text); }
+    .habit-count-pill {
+      font-size: 11px; font-weight: 500; padding: 3px 10px;
+      border-radius: var(--radius-full); background: var(--bg3);
+      border: 1px solid var(--border); color: var(--text3);
+      transition: color 0.25s ease, border-color 0.25s ease;
+    }
+    .habit-count-pill.all-done { color: var(--green); border-color: rgba(92,184,122,0.2); }
+
+    /* ── Daily Quote ── */
+    .today-quote-wrap {
+      padding: 32px 0 8px; text-align: center;
+      cursor: pointer; position: relative; display: block; width: 100%;
+    }
+    .today-quote-text {
+      font-size: 13px; color: var(--text3); font-style: italic; line-height: 1.7;
+    }
+    .today-quote-edit-icon {
+      opacity: 0; margin-left: 6px; font-style: normal; font-size: 11px;
+      transition: opacity 0.2s ease; display: inline;
+    }
+    .today-quote-wrap:hover .today-quote-edit-icon { opacity: 0.4; }
+    .today-quote-input {
+      background: transparent; border: none; border-bottom: 1px solid var(--border2);
+      border-radius: 0; font-size: 13px; color: var(--text3); font-style: italic;
+      font-family: 'DM Sans', sans-serif; text-align: center; width: 100%; max-width: 480px;
+      outline: none; padding: 4px 0; display: none;
+      transition: border-bottom-color 0.2s ease;
+    }
+    .today-quote-input:focus { border-bottom-color: var(--accent-dim); }
+
+    /* ─────────────────────────────────────────
+       RESPONSIVE — MOBILE
+    ───────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .nav-desktop { display: none; }
+      .nav-mobile  { display: block; }
+      .page-container { padding: 20px 16px 100px; }
+      #toast-container { bottom: 80px; right: 50%; transform: translateX(50%); width: calc(100% - 32px); max-width: 340px; }
+      .toast { animation: toast-in-mobile 0.25s ease; }
+      .toast.removing { opacity: 0; transform: translateY(8px); }
+
+      /* Today page mobile */
+      .today-metrics { grid-template-columns: repeat(2, 1fr); }
+      .today-greeting { font-size: 28px; }
+      .pillar-card { padding: 20px 16px; }
+      .habit-card  { padding: 20px 16px; }
+    }
+
+    @keyframes toast-in-mobile {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══════════════════════════════════════════
+       FOCUS PAGE — STAGE 3 STYLES
+    ═══════════════════════════════════════════ */
+
+    /* ── Mode Selector ── */
+    .focus-mode-row {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 28px;
+      margin-top: 8px;
+    }
+    .focus-mode-pill {
+      display: inline-flex;
+      gap: 3px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 4px;
+    }
+    .focus-mode-btn {
+      padding: 8px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text3);
+      background: transparent;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .focus-mode-btn:hover { color: var(--text2); }
+    .focus-mode-btn.active {
+      background: var(--bg4);
+      color: var(--text);
+      border-color: var(--border2);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    /* ── Tag Selector ── */
+    .focus-tag-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      margin-bottom: 10px;
+      padding-bottom: 2px;
+    }
+    .focus-tag-row::-webkit-scrollbar { display: none; }
+    .focus-tag-chip {
+      padding: 6px 16px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 500;
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      opacity: 0.45;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .focus-tag-chip:hover { opacity: 0.75; }
+    .focus-tag-chip.selected { opacity: 1; }
+
+    .focus-tag-add-wrap {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .focus-tag-add-link {
+      font-size: 12px;
+      color: var(--text3);
+      text-align: left;
+      padding: 0;
+      transition: color 0.2s;
+    }
+    .focus-tag-add-link:hover { color: var(--text2); }
+    .focus-tag-add-form {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .focus-tag-add-form.open { display: flex; }
+    .focus-tag-add-input {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 7px 12px;
+      font-size: 12px;
+      color: var(--text);
+      outline: none;
+      width: 140px;
+      transition: border-color 0.2s;
+    }
+    .focus-tag-add-input::placeholder { color: var(--text3); }
+    .focus-tag-add-input:focus { border-color: var(--accent-dim); }
+    .focus-tag-color-input {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      background: var(--bg3);
+      cursor: pointer;
+      padding: 2px;
+    }
+    .focus-tag-add-btn {
+      padding: 7px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--bg4);
+      border: 1px solid var(--border3);
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    .focus-tag-add-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+    .focus-tag-cancel-link {
+      font-size: 12px;
+      color: var(--text3);
+      padding: 0;
+      transition: color 0.2s;
+    }
+    .focus-tag-cancel-link:hover { color: var(--text2); }
+
+    .focus-duration-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+      align-items: center;
+    }
+    .focus-dur-chip {
+      padding: 7px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .focus-dur-chip:hover { background: var(--bg4); color: var(--text); }
+    .focus-dur-chip.active {
+      background: var(--accent-glow);
+      border-color: var(--accent-dim);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .focus-dur-custom {
+      padding: 7px 0;
+      width: 72px;
+      text-align: center;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+      -moz-appearance: textfield;
+    }
+    .focus-dur-custom::-webkit-outer-spin-button,
+    .focus-dur-custom::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .focus-dur-custom::placeholder { color: var(--text3); }
+    .focus-dur-custom:focus { border-color: var(--accent-dim); }
+
+    /* ── Ring ── */
+    .focus-ring-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    .focus-ring-container {
+      position: relative;
+      width: 260px;
+      height: 260px;
+      margin: 0 auto;
+    }
+    .focus-ring-svg {
+      width: 260px;
+      height: 260px;
+      transform: rotate(-90deg);
+      overflow: visible;
+    }
+    .focus-ring-track {
+      fill: none;
+      stroke: var(--bg4);
+      stroke-width: 10;
+    }
+    .focus-ring-arc {
+      fill: none;
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 691.15;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.5s linear, stroke 0.4s ease, opacity 0.3s ease;
+    }
+    .focus-ring-arc.idle-transition {
+      transition: stroke-dashoffset 0.3s ease, stroke 0.4s ease, opacity 0.3s ease;
+    }
+    .focus-ring-inner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      pointer-events: none;
+      width: 200px;
+    }
+    .focus-time-display {
+      font-family: 'DM Serif Display', serif;
+      font-size: 52px;
+      color: var(--text);
+      letter-spacing: 1px;
+      line-height: 1;
+      transition: color 0.4s ease;
+    }
+    .focus-ring-tag {
+      font-size: 13px;
+      color: var(--text3);
+      letter-spacing: 0.3px;
+    }
+    .focus-ring-status {
+      font-size: 11px;
+      color: var(--text3);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* ── Pomodoro dots ── */
+    .focus-pomo-dots {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+      align-items: center;
+      min-height: 16px;
+    }
+    .focus-pomo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--bg4);
+      transition: background 0.3s ease;
+    }
+    .focus-pomo-dot.filled { background: var(--accent); }
+    .focus-pomo-dot.active-dot { background: var(--accent-light); box-shadow: 0 0 6px rgba(168,168,188,0.4); }
+
+    /* ── Abandon banner ── */
+    .focus-abandon-banner {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      background: var(--bg3);
+      border: 1px solid rgba(200,112,112,0.25);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--text2);
+    }
+    .focus-abandon-banner.visible { display: flex; }
+    .focus-abandon-yes {
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(200,112,112,0.10);
+      border: 1px solid rgba(200,112,112,0.3);
+      color: var(--red);
+      transition: all 0.2s;
+    }
+    .focus-abandon-yes:hover { background: rgba(200,112,112,0.18); }
+    .focus-abandon-no {
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--bg4);
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      transition: all 0.2s;
+    }
+    .focus-abandon-no:hover { color: var(--text); }
+
+    /* ── Controls ── */
+    .focus-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .focus-btn-primary {
+      background: var(--bg3);
+      border: 1px solid var(--border3);
+      color: var(--text);
+      font-weight: 600;
+      font-size: 14px;
+      padding: 13px 36px;
+      border-radius: var(--radius-md);
+      transition: all 0.2s ease;
+    }
+    .focus-btn-primary:hover { border-color: var(--accent); color: var(--accent-light); }
+    .focus-btn-secondary {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 11px 28px;
+      border-radius: var(--radius-md);
+      transition: all 0.2s ease;
+    }
+    .focus-btn-secondary:hover { color: var(--text); border-color: var(--border3); }
+    .focus-btn-danger {
+      background: rgba(200,112,112,0.08);
+      border: 1px solid rgba(200,112,112,0.2);
+      color: var(--red);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 11px 28px;
+      border-radius: var(--radius-md);
+      transition: all 0.2s ease;
+    }
+    .focus-btn-danger:hover { background: rgba(200,112,112,0.15); border-color: rgba(200,112,112,0.35); }
+
+    /* ── Pomodoro Settings ── */
+    .focus-pomo-settings-wrap {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+      gap: 12px;
+    }
+    .focus-pomo-settings-wrap.visible { display: flex; }
+    .focus-pomo-settings-toggle {
+      font-size: 12px;
+      color: var(--text3);
+      transition: color 0.2s;
+    }
+    .focus-pomo-settings-toggle:hover { color: var(--text2); }
+    .focus-pomo-settings-panel {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      width: 100%;
+      max-width: 320px;
+    }
+    .focus-pomo-settings-panel.open { display: flex; }
+    .focus-pomo-setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .focus-pomo-setting-label {
+      font-size: 12px;
+      color: var(--text2);
+    }
+    .focus-pomo-setting-input {
+      width: 52px;
+      text-align: center;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 5px 6px;
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+      -moz-appearance: textfield;
+    }
+    .focus-pomo-setting-input::-webkit-outer-spin-button,
+    .focus-pomo-setting-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .focus-pomo-setting-input:focus { border-color: var(--accent-dim); }
+    .focus-pomo-settings-save {
+      padding: 9px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--bg4);
+      border: 1px solid var(--border3);
+      color: var(--text);
+      transition: all 0.2s;
+      align-self: flex-end;
+    }
+    .focus-pomo-settings-save:hover { border-color: var(--accent); color: var(--accent-light); }
+
+    /* ── Goal Bar ── */
+    .focus-goal-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-top: 24px;
+    }
+    .focus-goal-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .focus-goal-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text2);
+    }
+    .focus-goal-value {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      transition: color 0.3s;
+    }
+    .focus-goal-value.goal-reached { color: var(--green); }
+    .focus-goal-track {
+      height: 4px;
+      background: var(--bg4);
+      border-radius: var(--radius-full);
+      margin-top: 12px;
+      overflow: hidden;
+    }
+    .focus-goal-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+      transition: width 0.6s ease, background 0.4s ease;
+      width: 0%;
+    }
+    .focus-goal-fill.goal-reached { background: var(--green); }
+
+    /* ── Recent Sessions ── */
+    .focus-recent-heading {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin: 24px 0 12px;
+    }
+    .focus-recent-list { }
+    .focus-session-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .focus-session-row:last-child { border-bottom: none; }
+    .focus-session-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .focus-session-info { flex: 1; }
+    .focus-session-name {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .focus-session-dur {
+      font-size: 11px;
+      color: var(--text3);
+    }
+    .focus-session-time {
+      font-size: 11px;
+      color: var(--text3);
+      white-space: nowrap;
+    }
+    .focus-no-sessions {
+      font-size: 13px;
+      color: var(--text3);
+      padding: 16px 0;
+    }
+
+    /* ── Mobile Focus Adjustments ── */
+    @media (max-width: 640px) {
+      .focus-ring-container { width: 220px; height: 220px; }
+      .focus-ring-svg { width: 220px; height: 220px; }
+      .focus-time-display { font-size: 42px; }
+      .focus-duration-row { flex-wrap: wrap; }
+      .focus-btn-primary,
+      .focus-btn-secondary,
+      .focus-btn-danger { width: 100%; text-align: center; }
+      .focus-controls { flex-direction: column; width: 100%; }
+    }
+
+    /* ═══════════════════════════════════════════
+       REVIEW PAGE — STAGE 4 STYLES
+    ═══════════════════════════════════════════ */
+
+    /* ── Tab Switcher ── */
+    .review-tab-switcher {
+      display: inline-flex;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      gap: 3px;
+      margin-bottom: 32px;
+    }
+    .review-tab {
+      padding: 8px 24px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text3);
+      background: transparent;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .review-tab.active {
+      background: var(--bg4);
+      color: var(--text);
+      border-color: var(--border2);
+    }
+
+    /* ── Week Navigator ── */
+    .review-week-nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .review-week-arrow {
+      padding: 6px 14px;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text2);
+      font-size: 16px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .review-week-arrow:hover:not(:disabled) { color: var(--text); border-color: var(--border3); }
+    .review-week-arrow:disabled { opacity: 0.35; cursor: not-allowed; }
+    .review-week-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      min-width: 200px;
+      text-align: center;
+    }
+
+    /* ── Weekly Metrics override ── */
+    .review-metrics-grid { margin-bottom: 12px; }
+
+    /* ── Weekly Goals ── */
+    .review-goal-add-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 14px;
+    }
+    .review-goal-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border2);
+      border-radius: 0;
+      padding: 9px 0;
+      font-size: 14px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border-bottom-color 0.2s;
+    }
+    .review-goal-input::placeholder { color: var(--text3); }
+    .review-goal-input:focus { border-bottom-color: var(--accent-dim); }
+    .review-goal-add-btn {
+      font-size: 13px;
+      padding: 8px 18px;
+      background: var(--bg4);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .review-goal-add-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+    .review-goal-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 44px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+    }
+    .review-goal-item:last-of-type { border-bottom: none; }
+    .review-goal-delete {
+      font-size: 13px;
+      color: var(--text3);
+      padding: 2px 6px;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .review-goal-item:hover .review-goal-delete { opacity: 1; }
+    .review-goal-delete:hover { color: var(--red); }
+
+    /* ── Day-by-Day Breakdown ── */
+    .review-day-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .review-day-row:last-child { border-bottom: none; }
+    .review-day-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      min-width: 88px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .review-day-today-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .review-day-bar-track {
+      flex: 1;
+      height: 4px;
+      background: var(--bg4);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+    .review-day-bar-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+      transition: width 0.5s ease;
+    }
+    .review-day-time {
+      font-size: 12px;
+      color: var(--text2);
+      min-width: 52px;
+      text-align: right;
+    }
+    .review-day-time.empty { color: var(--text3); }
+
+    /* ── Focus by Tag ── */
+    .review-tag-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .review-tag-row:last-child { border-bottom: none; }
+    .review-tag-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .review-tag-name {
+      font-size: 13px;
+      color: var(--text);
+      flex: 1;
+    }
+    .review-tag-dur {
+      font-size: 12px;
+      color: var(--text2);
+    }
+    .review-tag-pct {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      background: var(--bg3);
+      color: var(--text3);
+    }
+    .review-empty-msg {
+      font-size: 13px;
+      color: var(--text3);
+      padding: 12px 0;
+    }
+
+    /* ── Consistency Card ── */
+    .review-consistency-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .review-consistency-left { flex: 1; }
+    .review-consistency-label {
+      font-size: 10px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 4px;
+    }
+    .review-consistency-number {
+      font-family: 'DM Serif Display', serif;
+      font-size: 48px;
+      color: var(--text);
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+    .review-consistency-sub {
+      font-size: 13px;
+      color: var(--text3);
+      margin-top: 2px;
+    }
+    .review-consistency-msg {
+      font-size: 12px;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+    .review-consistency-right { flex-shrink: 0; }
+    .review-ring-svg { transform: rotate(-90deg); display: block; }
+    .review-ring-track {
+      fill: none;
+      stroke: var(--bg4);
+      stroke-width: 5;
+    }
+    .review-ring-fill {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 5;
+      stroke-linecap: round;
+      stroke-dasharray: 150.796;
+      stroke-dashoffset: 150.796;
+      transition: stroke-dashoffset 0.7s ease;
+    }
+
+    /* ── Heatmap ── */
+    .review-heatmap-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 14px;
+    }
+    .review-heatmap-cell {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      cursor: default;
+      position: relative;
+    }
+    .review-heatmap-cell.today-cell {
+      outline: 1px solid var(--accent-dim);
+      outline-offset: 2px;
+    }
+    .review-heatmap-cell:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg5);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 4px 8px;
+      font-size: 11px;
+      color: var(--text2);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .review-heatmap-legend {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .review-legend-label { font-size: 11px; color: var(--text3); }
+    .review-legend-cell {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
+
+    /* ── Personal Records ── */
+    .review-record-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .review-record-row:last-child { border-bottom: none; }
+    .review-record-icon { font-size: 18px; min-width: 24px; }
+    .review-record-info { flex: 1; }
+    .review-record-label { font-size: 12px; color: var(--text3); line-height: 1.3; }
+    .review-record-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-left: auto;
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    /* ── Mobile Review Adjustments ── */
+    @media (max-width: 640px) {
+      .review-metrics-grid { grid-template-columns: repeat(2, 1fr); }
+      .review-heatmap-cell { width: 24px; height: 24px; }
+      .review-week-label { font-size: 13px; min-width: 160px; }
+      .review-consistency-card { flex-direction: column; align-items: flex-start; }
+      .review-consistency-right { align-self: flex-start; }
+    }
+
+    /* ═══════════════════════════════════════════
+       SETTINGS PAGE — STAGE 5 STYLES
+    ═══════════════════════════════════════════ */
+
+    /* ── Settings Cards ── */
+    .settings-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 0;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .settings-card-header {
+      padding: 18px 24px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .settings-card-title {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text3);
+    }
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-row-left { flex: 1; min-width: 0; }
+    .settings-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .settings-desc {
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 2px;
+    }
+    .settings-row-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* ── Settings Inputs ── */
+    .settings-input {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s ease;
+      width: 180px;
+    }
+    .settings-input::placeholder { color: var(--text3); }
+    .settings-input:focus { border-color: var(--accent-dim); }
+    .settings-input-sm { width: 72px; text-align: center; }
+    .settings-input-lg { width: 260px; }
+
+    /* ── Settings Select ── */
+    .settings-select {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 8px 28px 8px 12px;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpolyline points='1,1 6,7 11,1' stroke='%2352525e' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: border-color 0.2s ease;
+    }
+    .settings-select:focus { border-color: var(--accent-dim); }
+
+    /* ── Settings Buttons ── */
+    .settings-btn {
+      padding: 8px 18px;
+      background: var(--bg4);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+    .settings-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+    .settings-btn-danger {
+      padding: 8px 18px;
+      background: rgba(200,112,112,0.07);
+      border: 1px solid rgba(200,112,112,0.2);
+      border-radius: var(--radius-sm);
+      color: var(--red);
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .settings-btn-danger:hover { background: rgba(200,112,112,0.14); border-color: rgba(200,112,112,0.35); }
+
+    /* ── Saved indicator ── */
+    .settings-saved-indicator {
+      font-size: 12px;
+      color: var(--green);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      white-space: nowrap;
+    }
+    .settings-saved-indicator.visible { opacity: 1; }
+
+    /* ── Static badge ── */
+    .settings-badge {
+      font-size: 12px;
+      padding: 4px 10px;
+      background: var(--bg4);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      color: var(--text3);
+    }
+
+    /* ── Units label ── */
+    .settings-unit-label {
+      font-size: 12px;
+      color: var(--text3);
+    }
+
+    /* ── Email display ── */
+    .settings-email-display {
+      font-size: 13px;
+      color: var(--text2);
+    }
+
+    /* ── Inline confirmation row ── */
+    .settings-confirm-row {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .settings-confirm-row.visible { display: flex; }
+    .settings-confirm-text {
+      font-size: 13px;
+      color: var(--text2);
+    }
+    .settings-confirm-yes {
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(200,112,112,0.10);
+      border: 1px solid rgba(200,112,112,0.3);
+      color: var(--red);
+      transition: background 0.2s;
+    }
+    .settings-confirm-yes:hover { background: rgba(200,112,112,0.18); }
+    .settings-confirm-cancel {
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--bg4);
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      transition: color 0.2s;
+    }
+    .settings-confirm-cancel:hover { color: var(--text); }
+
+    /* ── Pillar Editor Panel ── */
+    .pillar-editor-panel {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin: 0 24px 4px;
+      display: none;
+      flex-direction: column;
+      gap: 0;
+    }
+    .pillar-editor-panel.open { display: flex; }
+    .pillar-editor-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .pillar-editor-item:last-of-type { border-bottom: none; }
+    .pillar-editor-item-label {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text2);
+    }
+    .pillar-editor-delete {
+      font-size: 14px;
+      color: var(--text3);
+      padding: 2px 6px;
+      transition: color 0.15s;
+      line-height: 1;
+    }
+    .pillar-editor-delete:hover { color: var(--red); }
+    .pillar-editor-add-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 12px;
+    }
+    .pillar-editor-add-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border2);
+      border-radius: 0;
+      padding: 6px 0;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-bottom-color 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .pillar-editor-add-input::placeholder { color: var(--text3); }
+    .pillar-editor-add-input:focus { border-bottom-color: var(--accent-dim); }
+    .pillar-editor-add-btn {
+      padding: 6px 14px;
+      background: var(--bg4);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      transition: border-color 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .pillar-editor-add-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+    .pillar-editor-done-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+    .pillar-editor-done-btn {
+      padding: 7px 18px;
+      background: var(--bg4);
+      border: 1px solid var(--border3);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 13px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .pillar-editor-done-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+
+    /* ── Tag Manager Panel ── */
+    .tag-manager-panel {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin: 0 24px 4px;
+      display: none;
+      flex-direction: column;
+    }
+    .tag-manager-panel.open { display: flex; }
+    .tag-manager-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .tag-manager-item:last-of-type { border-bottom: none; }
+    .tag-manager-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .tag-manager-name {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text2);
+    }
+    .tag-manager-delete {
+      font-size: 14px;
+      color: var(--text3);
+      padding: 2px 6px;
+      transition: color 0.15s;
+      line-height: 1;
+    }
+    .tag-manager-delete:hover { color: var(--red); }
+    .tag-manager-add-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .tag-manager-add-input {
+      flex: 1;
+      min-width: 100px;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border2);
+      border-radius: 0;
+      padding: 6px 0;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-bottom-color 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .tag-manager-add-input::placeholder { color: var(--text3); }
+    .tag-manager-add-input:focus { border-bottom-color: var(--accent-dim); }
+    .tag-manager-color-input {
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      background: var(--bg3);
+      cursor: pointer;
+      padding: 2px;
+      flex-shrink: 0;
+    }
+    .tag-manager-add-btn {
+      padding: 6px 14px;
+      background: var(--bg4);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      transition: border-color 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .tag-manager-add-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+    .tag-manager-done-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+    .tag-manager-done-btn {
+      padding: 7px 18px;
+      background: var(--bg4);
+      border: 1px solid var(--border3);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 13px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .tag-manager-done-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+
+    /* ── About card ── */
+    .settings-about-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .settings-version {
+      font-size: 13px;
+      color: var(--text3);
+    }
+    .settings-about-emoji { font-size: 18px; }
+
+    /* ── Mobile Settings Adjustments ── */
+    @media (max-width: 640px) {
+      .settings-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .settings-row-right { width: 100%; }
+      .settings-input,
+      .settings-input-lg,
+      .settings-select { width: 100%; }
+      .settings-input-sm { width: 72px; }
+      .pillar-editor-panel,
+      .tag-manager-panel { margin: 0 16px 4px; }
+    }
+
+    /* ═══════════════════════════════════════════
+       STAGE 6 — FINAL POLISH
+    ═══════════════════════════════════════════ */
+
+    /* ── FP7: Selection color ── */
+    ::selection { background: rgba(168,168,188,0.2); color: var(--text); }
+
+    /* ── FP8: Custom scrollbars ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bg5); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text4); }
+
+    /* ── FP6: Prevent double-tap zoom, FP9: No horizontal overflow ── */
+    body { overflow-x: hidden; }
+    button { touch-action: manipulation; }
+
+    /* ── FP5: Input autocomplete hygiene already in HTML; tap highlight ── */
+    .settings-input { -webkit-tap-highlight-color: transparent; }
+
+    /* ── Today P1: Hero spacing ── */
+    .today-hero { margin-bottom: 0; padding-bottom: 36px; }
+
+    /* ── Today P2: Metrics row bottom margin ── */
+    .today-metrics { margin-bottom: 36px; }
+
+    /* ── Today P4: Intention label color ── */
+    .today-intention-label { color: var(--text3); }
+
+    /* ── Today P5: Quote section bottom padding ── */
+    .today-quote-wrap { padding-bottom: 24px; }
+
+    /* ── Today P3: Last pillar card spacing (via JS-rendered cards) ── */
+    #today-pillars .pillar-card:last-child { margin-bottom: 24px; }
+
+    /* ── MI1: Page heading fade-in animation ── */
+    @keyframes page-heading-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .page.active .page-heading,
+    .page.active .page-tagline,
+    .page.active .today-greeting,
+    .page.active .today-date-line {
+      animation: page-heading-in 0.2s ease both;
+    }
+    .page.active .page-tagline  { animation-delay: 0.04s; }
+    .page.active .today-greeting { animation-delay: 0.04s; }
+
+    /* ── MI2: Metric card hover lift ── */
+    .metric-card {
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+    .metric-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-1px);
+    }
+
+    /* ── MI3: Checklist item check animation ── */
+    @keyframes check-pop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
+    .checklist-item.checked .check-box {
+      animation: check-pop 0.2s ease;
+    }
+
+    /* ── MI4: Button press state ── */
+    .settings-btn:active,
+    .settings-btn-danger:active,
+    .focus-btn-primary:active,
+    .focus-btn-secondary:active,
+    .focus-btn-danger:active { transform: scale(0.98); }
+
+    /* ── MI6: Nav tab active indicator transition (already present; reinforce) ── */
+    .nav-tab { transition: color 0.2s ease, border-bottom-color 0.2s ease; }
+
+    /* ── Focus P1: Ring wrap centering ── */
+    .focus-ring-wrap {
+      margin: 8px auto 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Focus P2: Mode pill centering (already center; add explicit mb) ── */
+    .focus-mode-row {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+
+    /* ── Focus P3: Tag row scroll ── */
+    .focus-tag-row {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .focus-tag-row::-webkit-scrollbar { display: none; }
+
+    /* ── Focus P4: Duration row centering ── */
+    .focus-duration-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+
+    /* ── Focus P5: Goal card margin ── */
+    .focus-goal-card { margin-top: 32px; }
+    @media (max-width: 640px) {
+      .focus-goal-card { margin-top: 24px; }
+    }
+
+    /* ── Focus P6: Session row last-child border ── */
+    .focus-session-row:last-child { border-bottom: none; }
+
+    /* ── Review P1: Tab switcher full width on mobile ── */
+    @media (max-width: 640px) {
+      .review-tab-switcher { display: flex; width: 100%; }
+      .review-tab { flex: 1; text-align: center; }
+      /* Review P2: Week nav space-between on mobile */
+      .review-week-nav { justify-content: space-between; }
+    }
+
+    /* ── Review P3: Heatmap overflow scroll ── */
+    .review-heatmap-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+    /* ── Review P4: Analytics section top spacing ── */
+    #review-analytics-section { padding-top: 4px; }
+
+    /* ── Settings P1: About card bottom margin ── */
+    .settings-card:last-child { margin-bottom: 40px; }
+
+    /* ── Settings P2: Input tap highlight ── */
+    @media (max-width: 640px) {
+      .settings-input { -webkit-tap-highlight-color: transparent; }
+    }
+
+    /* ── Settings P3: Pillar editor panel bottom margin when open ── */
+    .pillar-editor-panel.open { margin-bottom: 8px; }
+    .tag-manager-panel.open   { margin-bottom: 8px; }
+
+  </style>
+
+</head>
+<body>
+
+  <!-- ── LOADING SCREEN ── -->
+
+  <div id="loading-screen">
+    <span class="loading-brand">Daily OS</span>
+    <div class="loading-dots">
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+    </div>
+  </div>
+
+  <!-- ── AUTH SCREEN ── -->
+
+  <div id="auth-screen" class="hidden">
+    <div class="auth-card">
+      <div class="auth-logo">Daily OS</div>
+      <div class="auth-tagline">Your personal discipline OS</div>
+      <div class="auth-mode-toggle">
+        <button class="auth-mode-btn active" id="btn-signin" onclick="setAuthMode('signin')">Sign In</button>
+        <button class="auth-mode-btn"        id="btn-signup" onclick="setAuthMode('signup')">Create Account</button>
+      </div>
+      <div class="auth-form">
+        <div class="auth-name-field" id="name-field">
+          <input type="text" class="auth-input" id="auth-name" placeholder="Your name" autocomplete="name" />
+        </div>
+        <input type="email"    class="auth-input" id="auth-email"    placeholder="Email address"  autocomplete="email" />
+        <input type="password" class="auth-input" id="auth-password" placeholder="Password"       autocomplete="current-password" />
+        <button class="auth-submit-btn" id="auth-submit-btn" onclick="handleAuth()">Sign In</button>
+        <div class="auth-error" id="auth-error"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── APP SHELL ── -->
+
+  <div id="app">
+
+```
+<!-- Desktop Nav -->
+<nav class="nav-desktop">
+  <div class="nav-brand">Daily OS</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-page="today"    onclick="showPage('today')">Today</button>
+    <button class="nav-tab"        data-page="focus"    onclick="showPage('focus')">Focus</button>
+    <button class="nav-tab"        data-page="review"   onclick="showPage('review')">Review</button>
+    <button class="nav-tab"        data-page="settings" onclick="showPage('settings')">Settings</button>
+  </div>
+  <div class="nav-right">
+    <div class="sync-pill synced" id="sync-pill">
+      <div class="sync-dot"></div>
+      <span id="sync-label">Synced</span>
+    </div>
+    <span class="nav-user-email" id="nav-user-email"></span>
+    <button class="nav-logout-btn" onclick="handleLogout()">Log out</button>
+  </div>
+</nav>
+
+<!-- Mobile Nav -->
+<nav class="nav-mobile">
+  <div class="nav-mobile-inner">
+    <button class="nav-mobile-tab active" data-page="today"    onclick="showPage('today')"><span class="nav-mobile-icon">🏠</span>Today</button>
+    <button class="nav-mobile-tab"        data-page="focus"    onclick="showPage('focus')"><span class="nav-mobile-icon">⏱</span>Focus</button>
+    <button class="nav-mobile-tab"        data-page="review"   onclick="showPage('review')"><span class="nav-mobile-icon">📊</span>Review</button>
+    <button class="nav-mobile-tab"        data-page="settings" onclick="showPage('settings')"><span class="nav-mobile-icon">⚙️</span>Settings</button>
+  </div>
+</nav>
+
+<!-- Pages -->
+<div class="page-container">
+
+  <!-- ════════════════════════════════
+       TODAY PAGE
+  ═════════════════════════════════ -->
+  <div class="page active" id="page-today">
+
+    <!-- SECTION 1: HERO -->
+    <section class="today-hero">
+      <div class="today-date-line" id="today-date-line"></div>
+      <div class="today-greeting"  id="today-greeting"></div>
+      <span class="today-streak"   id="today-streak"></span>
+      <div class="today-intention-label">Today's Intention</div>
+      <input
+        type="text"
+        class="today-intention-input"
+        id="today-intention"
+        placeholder="What is your one priority today?"
+        autocomplete="off"
+      />
+      <span class="today-intention-saved" id="today-intention-saved">Saved</span>
+    </section>
+
+    <!-- SECTION 2: METRICS ROW -->
+    <div class="today-metrics" id="today-metrics"></div>
+
+    <!-- SECTION 3: THREE PILLARS -->
+    <div id="today-pillars"></div>
+
+    <!-- SECTION 4: HABIT TRACKER -->
+    <div class="habit-card" id="habit-card">
+      <div class="habit-header">
+        <span class="habit-title">Habit Tracker</span>
+        <span class="habit-count-pill" id="habit-count-pill">0 / 8</span>
+      </div>
+      <div class="pillar-divider"></div>
+      <div id="habit-list"></div>
+    </div>
+
+    <!-- SECTION 5: DAILY QUOTE -->
+    <div class="today-quote-wrap" id="today-quote-wrap" onclick="handleQuoteClick()">
+      <span class="today-quote-text"  id="today-quote-text"></span>
+      <span class="today-quote-edit-icon">✏️</span>
+      <input type="text" class="today-quote-input" id="today-quote-input" placeholder="Enter your daily quote…" />
+    </div>
+
+  </div><!-- /page-today -->
+
+  <div class="page" id="page-focus">
+
+    <!-- Mode Selector -->
+    <div class="focus-mode-row">
+      <div class="focus-mode-pill" id="focus-mode-pill">
+        <button class="focus-mode-btn active" data-mode="timer"     onclick="focusSwitchMode('timer')">Timer</button>
+        <button class="focus-mode-btn"        data-mode="stopwatch" onclick="focusSwitchMode('stopwatch')">Stopwatch</button>
+        <button class="focus-mode-btn"        data-mode="pomodoro"  onclick="focusSwitchMode('pomodoro')">Pomodoro</button>
+      </div>
+    </div>
+
+    <!-- Tag Selector -->
+    <div class="focus-tag-row" id="focus-tag-row"></div>
+    <div class="focus-tag-add-wrap" id="focus-tag-add-wrap">
+      <button class="focus-tag-add-link" onclick="focusToggleAddTag()">+ Add tag</button>
+      <div class="focus-tag-add-form" id="focus-tag-add-form">
+        <input type="text"  class="focus-tag-add-input" id="focus-tag-name-input" placeholder="Tag name" maxlength="24" />
+        <input type="color" class="focus-tag-color-input" id="focus-tag-color-input" value="#a8a8bc" />
+        <button class="focus-tag-add-btn" onclick="focusAddTag()">Add</button>
+        <button class="focus-tag-cancel-link" onclick="focusToggleAddTag()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Duration Selector (Timer mode only) -->
+    <div class="focus-duration-row" id="focus-duration-row">
+      <button class="focus-dur-chip" data-dur="900"  onclick="focusSetDuration(900)">15 min</button>
+      <button class="focus-dur-chip active" data-dur="1500" onclick="focusSetDuration(1500)">25 min</button>
+      <button class="focus-dur-chip" data-dur="1800" onclick="focusSetDuration(1800)">30 min</button>
+      <button class="focus-dur-chip" data-dur="2700" onclick="focusSetDuration(2700)">45 min</button>
+      <button class="focus-dur-chip" data-dur="3600" onclick="focusSetDuration(3600)">60 min</button>
+      <button class="focus-dur-chip" data-dur="5400" onclick="focusSetDuration(5400)">90 min</button>
+      <input type="number" class="focus-dur-custom" id="focus-dur-custom" placeholder="custom" min="1" max="180"
+             oninput="focusSetCustomDuration(this.value)" />
+    </div>
+
+    <!-- THE RING -->
+    <div class="focus-ring-wrap">
+      <div class="focus-ring-container" id="focus-ring-container">
+        <svg class="focus-ring-svg" viewBox="0 0 260 260" id="focus-ring-svg">
+          <circle class="focus-ring-track" cx="130" cy="130" r="110" />
+          <circle class="focus-ring-arc"   cx="130" cy="130" r="110" id="focus-ring-arc" />
+        </svg>
+        <div class="focus-ring-inner">
+          <div class="focus-time-display" id="focus-time-display">25:00</div>
+          <div class="focus-ring-tag"    id="focus-ring-tag">Study</div>
+          <div class="focus-ring-status" id="focus-ring-status">Ready</div>
+        </div>
+      </div>
+      <!-- Pomodoro dots -->
+      <div class="focus-pomo-dots" id="focus-pomo-dots"></div>
+    </div>
+
+    <!-- Abandon confirmation banner -->
+    <div class="focus-abandon-banner" id="focus-abandon-banner">
+      <span>Abandon this session?</span>
+      <button class="focus-abandon-yes" onclick="focusConfirmAbandon()">Yes, abandon</button>
+      <button class="focus-abandon-no"  onclick="focusHideAbandonBanner()">Keep going</button>
+    </div>
+
+    <!-- Controls -->
+    <div class="focus-controls" id="focus-controls"></div>
+
+    <!-- Pomodoro Settings -->
+    <div class="focus-pomo-settings-wrap" id="focus-pomo-settings-wrap">
+      <button class="focus-pomo-settings-toggle" onclick="focusTogglePomoSettings()">Settings ⚙</button>
+      <div class="focus-pomo-settings-panel" id="focus-pomo-settings-panel">
+        <div class="focus-pomo-setting-row">
+          <label class="focus-pomo-setting-label">Focus mins</label>
+          <input type="number" class="focus-pomo-setting-input" id="pomo-focus-mins" value="25" min="1" max="90" />
+        </div>
+        <div class="focus-pomo-setting-row">
+          <label class="focus-pomo-setting-label">Short break</label>
+          <input type="number" class="focus-pomo-setting-input" id="pomo-short-break" value="5" min="1" max="30" />
+        </div>
+        <div class="focus-pomo-setting-row">
+          <label class="focus-pomo-setting-label">Long break</label>
+          <input type="number" class="focus-pomo-setting-input" id="pomo-long-break" value="15" min="1" max="60" />
+        </div>
+        <div class="focus-pomo-setting-row">
+          <label class="focus-pomo-setting-label">Long break after</label>
+          <input type="number" class="focus-pomo-setting-input" id="pomo-long-after" value="4" min="2" max="8" />
+        </div>
+        <button class="focus-pomo-settings-save" onclick="focusSavePomoSettings()">Save Settings</button>
+      </div>
+    </div>
+
+    <!-- Daily Focus Goal Bar -->
+    <div class="focus-goal-card" id="focus-goal-card">
+      <div class="focus-goal-top">
+        <span class="focus-goal-label">Daily Focus Goal</span>
+        <span class="focus-goal-value" id="focus-goal-value">0m of 4h</span>
+      </div>
+      <div class="focus-goal-track">
+        <div class="focus-goal-fill" id="focus-goal-fill"></div>
+      </div>
+    </div>
+
+    <!-- Recent Sessions -->
+    <div class="focus-recent-heading">Recent Sessions</div>
+    <div class="focus-recent-list" id="focus-recent-list"></div>
+
+  </div><!-- /page-focus -->
+
+  <div class="page" id="page-review">
+    <h1 class="page-heading">Review</h1>
+    <p class="page-tagline">Your progress, week by week.</p>
+
+    <!-- Tab Switcher -->
+    <div class="review-tab-switcher">
+      <button class="review-tab active" id="rtab-weekly"    onclick="switchReviewTab('weekly')">Weekly</button>
+      <button class="review-tab"        id="rtab-analytics" onclick="switchReviewTab('analytics')">Analytics</button>
+    </div>
+
+    <!-- ── SUB-SECTION A: WEEKLY ── -->
+    <div id="review-weekly-section">
+
+      <!-- A1: Week Navigator -->
+      <div class="review-week-nav">
+        <button class="review-week-arrow" onclick="shiftWeek(-1)">‹</button>
+        <span class="review-week-label" id="review-week-label"></span>
+        <button class="review-week-arrow" id="review-week-next" onclick="shiftWeek(1)">›</button>
+      </div>
+
+      <!-- A2: Weekly Summary Metrics -->
+      <div class="today-metrics review-metrics-grid" id="review-weekly-metrics"></div>
+
+      <!-- A3: Weekly Goals -->
+      <div class="pillar-card" id="review-goals-card">
+        <div class="pillar-header">
+          <span class="pillar-name">This Week's Goals</span>
+          <span class="pillar-badge" id="review-goals-pill">0 / 0</span>
+        </div>
+        <div class="pillar-divider"></div>
+        <div id="review-goals-list"></div>
+        <div class="review-goal-add-row" id="review-goal-add-row">
+          <input type="text" class="review-goal-input" id="review-goal-input" placeholder="Add a weekly goal…" />
+          <button class="review-goal-add-btn" onclick="addWeeklyGoal()">Add</button>
+        </div>
+      </div>
+
+      <!-- A4: Day-by-Day Breakdown -->
+      <div class="pillar-card">
+        <div class="pillar-header"><span class="pillar-name">Days this week</span></div>
+        <div class="pillar-divider"></div>
+        <div id="review-days-list"></div>
+      </div>
+
+      <!-- A5: Focus by Tag -->
+      <div class="pillar-card">
+        <div class="pillar-header"><span class="pillar-name">Focus by Tag</span></div>
+        <div class="pillar-divider"></div>
+        <div id="review-tag-breakdown"></div>
+      </div>
+
+    </div><!-- /review-weekly-section -->
+
+    <!-- ── SUB-SECTION B: ANALYTICS ── -->
+    <div id="review-analytics-section" style="display:none">
+
+      <!-- B1: All-Time Stats -->
+      <div class="today-metrics review-metrics-grid" id="review-alltime-metrics"></div>
+
+      <!-- B4: Consistency Score (placed before heatmap for visual weight) -->
+      <div class="review-consistency-card" id="review-consistency-card">
+        <div class="review-consistency-left">
+          <div class="review-consistency-label">Consistency</div>
+          <div class="review-consistency-number" id="review-consistency-num">0</div>
+          <div class="review-consistency-sub">% last 30 days</div>
+          <div class="review-consistency-msg" id="review-consistency-msg"></div>
+        </div>
+        <div class="review-consistency-right">
+          <svg class="review-ring-svg" width="60" height="60" viewBox="0 0 60 60" id="review-consistency-ring">
+            <circle class="review-ring-track" cx="30" cy="30" r="24" />
+            <circle class="review-ring-fill"  cx="30" cy="30" r="24" id="review-ring-fill" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- B2: 30-Day Heatmap -->
+      <div class="pillar-card">
+        <div class="pillar-header"><span class="pillar-name">Last 30 Days</span></div>
+        <div class="pillar-divider"></div>
+        <div class="review-heatmap-wrap">
+          <div class="review-heatmap-grid" id="review-heatmap"></div>
+        </div>
+        <div class="review-heatmap-legend">
+          <span class="review-legend-label">Less</span>
+          <div class="review-legend-cell" style="background:var(--bg3)"></div>
+          <div class="review-legend-cell" style="background:rgba(168,168,188,0.15)"></div>
+          <div class="review-legend-cell" style="background:rgba(168,168,188,0.30)"></div>
+          <div class="review-legend-cell" style="background:rgba(168,168,188,0.55)"></div>
+          <div class="review-legend-cell" style="background:rgba(168,168,188,0.85)"></div>
+          <span class="review-legend-label">More</span>
+        </div>
+      </div>
+
+      <!-- B3: Personal Records -->
+      <div class="pillar-card">
+        <div class="pillar-header"><span class="pillar-name">Personal Records</span></div>
+        <div class="pillar-divider"></div>
+        <div id="review-records-list"></div>
+      </div>
+
+    </div><!-- /review-analytics-section -->
+  </div><!-- /page-review -->
+
+  <div class="page" id="page-settings">
+    <h1 class="page-heading">Settings</h1>
+    <p class="page-tagline">Personalize your Daily OS.</p>
+
+    <!-- GROUP 1: PROFILE -->
+    <div class="settings-card">
+      <div class="settings-card-header">
+        <span class="settings-card-title">Profile</span>
+      </div>
+      <!-- Display Name -->
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-label">Display Name</div>
+          <div class="settings-desc">Used in your daily greeting</div>
+        </div>
+        <div class="settings-row-right">
+          <input type="text" class="settings-input" id="settings-username"
+                 placeholder="Your name"
+                 autocomplete="off"
+                 onblur="settingSaveUsername()"
+                 onkeydown="if(event.key==='Enter'){this.blur()}" />
+          <span class="settings-saved-indicator" id="settings-username-saved">Saved ✓</span>
+        </div>
+      </div>
+      <!-- Account Email -->
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-label">Account</div>
+          <div class="settings-desc">Your signed-in account</div>
+        </div>
+        <div class="settings-row-right">
+          <span class="settings-email-display" id="settings-account-email">—</span>
+        </div>
+      </div>
+      <!-- Sign Out -->
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-label">Sign Out</div>
+          <div class="settings-desc">Sign out of Daily OS</div>
+        </div>
+        <div class="settings-row-right">
+          <button class="settings-btn-danger" onclick="handleLogout()">Sign Out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GROUP 2: DAILY GOALS -->
+    <div class="settings-card">
+      <div class="settings-card-header">
+        <span class="settings-card-title">Daily Goals</span>
+      </div>
+      <!-- Focus Goal -->
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-label">Focus Goal</div>
+          <div class="settings-desc">Target focus hours per day</div>
+        </div>
+        <div class="settings-row-right">
+          <input type="number" class="settings-input settings-input-sm" id="settings-focus-goal"
+                 min="1" max="16" step="0.5"
+                 autocomplete="off"
+                 onblur="settingSaveFocusGoal()"
+                 onkeydown="if(event.key==='Enter'){this.blur()}" />
+          <span class="settings-unit-label">hours</span>
+          <span class="settings-saved-indicator" id="settings-goal-saved">Saved ✓</span>
+        </div>
+      </div>
+      <!-- Daily Intention Reset -->
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-label">Daily Intention</div>
+          <div class="settings-desc">Resets automatically each day</div>
+        </div>
+        <div class="settings-row-right">
+          <span class="settings-badge">Auto-resets daily</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- GROUP 3: TODAY PAGE -->
+    <div class="settings-card" id="settings-today-card">
+      <div class="settings-card-header">
+        <span class="settings-card-title">Today Page</span>
+      </div>
+      <!-- Career Pillar -->
+      <div class="settings-row" id="settings-row-career">
+        <div class="settings-row-left">
+          <div class="settings-label">Career Goals</div>
+          <div class="settings-desc">Items tracked in your Career pillar</div>
+        </div>
+        <div class="settings-row-right">
+          <button class="settings-btn" onclick="openPillarEditor('career')">Edit</button>
+        </div>
+      </div>
+      <div class="pillar-editor-panel" id="pillar-editor-career"></div>
+      <!-- Physical Pillar -->
+      <div class="settings-row" id="settings-row-physical">
+        <div class="settings-row-left">
+          <div class="settings-label">Physical Goals</div>
+          <div class="settings-desc">Items tracked in your Physical pillar</div>
+        </div>
+        <div class="settings-row-right">
+          <button class="settings-btn" onclick="openPillarEditor('physical')">Edit</button>
+        </div>
+      </div>
+      <div class="pillar-editor-panel" id="pillar-editor-physical"></div>
+      <!-- Spiritual Pillar -->
+      <div class="settings-row" id="settings-row-spiritual">
+        <div class="settings-row-left">
+          <div class="settings-label">Spiritual Goals</div>
+          <div class="settings-desc">Items tracked in your Spiritual pillar</div>
+        </div>
+        <div class="settings-row-right">
+          <button class="settings-btn" onclick="openPillarEditor('spiritual')">Edit</button>
+        </div>
+      </div>
+      <div class="pillar-editor-panel" id="pillar-editor-spiritual"></div>
+      <!-- Habits -->
+      <div class="settings-row" id="settings-row-habit">
+        <div class="settings-row-left">
+          <div class="settings-label">Habit Tracker Items</div>
+          <div class="settings-desc">Habits you track daily</div>
+        </div>
+        <div class="settings-row-right">
+          <button class="settings-btn" onclick="openPillarEditor('habit')">Edit</button>
+        </div>
+      </div>
+      <div class="pillar-editor-panel" id="pillar-editor-habit"></div>
+      <!-- Daily Quote -->
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-label">Daily Quote</div>
+          <div class="settings-desc">The quote shown at the bottom of Today</div>
+        </div>
+        <div class="settings-row-right">
+          <input type="text" class="settings-input settings-input-lg" id="settings-quote"
+                 placeholder="Enter your daily quote…"
+                 autocomplete="off"
+                 onblur="settingSaveQuote()"
+                 onkeydown="if(event.key==='Enter'){this.blur()}" />
+          <span class="settings-saved-indicator" id="settings-quote-saved">Saved ✓</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- GROUP 4: FOCUS TIMER -->
+    <div class="settings-card">
+      <div class="settings-card-header">
+        <span class="settings-card-title">Focus Timer</span>
+      </div>
+      <!-- Default Duration -->
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-label">Default Duration</div>
+          <div class="settings-desc">Starting duration for Timer mode</div>
+        </div>
+        <div class="settings-row-right">
+          <select class="settings-select" id="settings-default-duration" onchange="settingSaveDefaultDuration()">
+            <option value="15">15 min</option>
+            <option value="20">20 min</option>
+            <option value="25">25 min</option>
+            <option value="30">30 min</option>
+            <option value="45">45 min</option>
+            <option value="60">60 min</option>
+            <option value="90">90 min</option>
+          </select>
+        </div>
+      </div>
+      <!-- Focus Tags -->
+      <div class="settings-row" id="settings-row-tags">
+        <div class="settings-row-left">
+          <div class="settings-label">Focus Tags</div>
+          <div class="settings-desc">Tags available in the Focus timer</div>
+        </div>
+        <div class="settings-row-right">
+          <button class="settings-btn" onclick="openTagManager()">Manage Tags</button>
+        </div>
+      </div>
+      <div class="tag-manager-panel" id="tag-manager-panel"></div>
+    </div>
+
+    <!-- GROUP 5: DATA -->
+    <div class="settings-card">
+      <div class="settings-card-header">
+        <span class="settings-card-title">Data</span>
+      </div>
+      <!-- Export Sessions -->
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-label">Export Data</div>
+          <div class="settings-desc">Download all your focus sessions as a CSV file</div>
+        </div>
+        <div class="settings-row-right">
+          <button class="settings-btn" onclick="settingExportCSV()">Export CSV</button>
+        </div>
+      </div>
+      <!-- Clear Today -->
+      <div class="settings-row" id="settings-row-clear-today">
+        <div class="settings-row-left">
+          <div class="settings-label">Clear Today</div>
+          <div class="settings-desc">Reset all of today's pillar checks, habit checks, and intention</div>
+        </div>
+        <div class="settings-row-right" id="settings-clear-today-controls">
+          <button class="settings-btn-danger" onclick="settingClearToday()">Clear Today</button>
+        </div>
+      </div>
+      <!-- Clear Sessions -->
+      <div class="settings-row" id="settings-row-clear-sessions">
+        <div class="settings-row-left">
+          <div class="settings-label">Clear Sessions</div>
+          <div class="settings-desc">Delete all recorded focus sessions permanently</div>
+        </div>
+        <div class="settings-row-right" id="settings-clear-sessions-controls">
+          <button class="settings-btn-danger" onclick="settingClearSessions()">Clear Sessions</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GROUP 6: ABOUT -->
+    <div class="settings-card">
+      <div class="settings-card-header">
+        <span class="settings-card-title">About</span>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-about-name">Daily OS</div>
+          <div class="settings-desc">Your personal discipline OS</div>
+        </div>
+        <div class="settings-row-right">
+          <span class="settings-version">v2.0</span>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-left">
+          <div class="settings-desc">Built for focus, discipline, and growth.</div>
+        </div>
+        <div class="settings-row-right">
+          <span class="settings-about-emoji">🔱</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-settings -->
+
+</div><!-- /page-container -->
+```
+
+  </div><!-- /app -->
+
+  <div id="toast-container"></div>
+
+  <script>
+    /* ══════════════════════════════════════════════════
+       STAGE 1 — CORE INFRASTRUCTURE
+    ══════════════════════════════════════════════════ */
+
+    // ── SUPABASE ──────────────────────────────────────
+    const SUPABASE_URL = 'https://hzfxrwmzmwvleblmfpqv.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Znhyd216bXd2bGVibG1mcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMzYyNTIsImV4cCI6MjA5MjcxMjI1Mn0.p9sxIc9W6rlCTbFm5N-PJTWE8wYj6CQbJiicOjm9gcY';
+    const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ── STATE ─────────────────────────────────────────
+    let currentUser     = null;
+    let currentAuthMode = 'signin';
+
+    // ── DOM REFS ──────────────────────────────────────
+    const loadingScreen  = document.getElementById('loading-screen');
+    const authScreen     = document.getElementById('auth-screen');
+    const appShell       = document.getElementById('app');
+    const authError      = document.getElementById('auth-error');
+    const authSubmitBtn  = document.getElementById('auth-submit-btn');
+    const nameField      = document.getElementById('name-field');
+    const navUserEmail   = document.getElementById('nav-user-email');
+    const syncPill       = document.getElementById('sync-pill');
+    const syncLabel      = document.getElementById('sync-label');
+    const toastContainer = document.getElementById('toast-container');
+
+    // ── AUTH STATE LISTENER ───────────────────────────
+    supa.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        currentUser = session.user;
+        hideLoadingScreen();
+        showApp();
+        initApp();
+      } else {
+        currentUser = null;
+        hideLoadingScreen();
+        hideApp();
+        showAuthScreen();
+      }
+    });
+
+    // ── SCREEN TRANSITIONS ────────────────────────────
+    function hideLoadingScreen() { loadingScreen.classList.add('hidden'); }
+    function showAuthScreen()    { authScreen.classList.remove('hidden'); }
+    function hideAuthScreen()    { authScreen.classList.add('hidden'); }
+    function showApp()           { appShell.classList.add('visible'); hideAuthScreen(); }
+    function hideApp()           { appShell.classList.remove('visible'); }
+
+    // ── AUTH MODE TOGGLE ──────────────────────────────
+    function setAuthMode(mode) {
+      currentAuthMode = mode;
+      clearAuthError();
+      const btnSignin = document.getElementById('btn-signin');
+      const btnSignup = document.getElementById('btn-signup');
+      if (mode === 'signin') {
+        btnSignin.classList.add('active'); btnSignup.classList.remove('active');
+        nameField.classList.remove('visible');
+        authSubmitBtn.textContent = 'Sign In';
+        document.getElementById('auth-password').autocomplete = 'current-password';
+      } else {
+        btnSignup.classList.add('active'); btnSignin.classList.remove('active');
+        nameField.classList.add('visible');
+        authSubmitBtn.textContent = 'Create Account';
+        document.getElementById('auth-password').autocomplete = 'new-password';
+      }
+    }
+
+    // ── AUTH HANDLER ──────────────────────────────────
+    async function handleAuth() {
+      clearAuthError();
+      const email    = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+      const name     = document.getElementById('auth-name').value.trim();
+      if (!email || !password) { showAuthError('Please enter your email and password.'); return; }
+      if (currentAuthMode === 'signup' && !name) { showAuthError('Please enter your name.'); return; }
+      setAuthLoading(true);
+      try {
+        if (currentAuthMode === 'signin') {
+          const { error } = await supa.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+        } else {
+          const { error } = await supa.auth.signUp({ email, password, options: { data: { full_name: name } } });
+          if (error) throw error;
+          showToast('Account created! Check your email to confirm.', 'success');
+        }
+      } catch (err) {
+        showAuthError(err.message || 'Something went wrong. Please try again.');
+      } finally {
+        setAuthLoading(false);
+      }
+    }
+
+    function setAuthLoading(isLoading) {
+      authSubmitBtn.disabled = isLoading;
+      authSubmitBtn.textContent = isLoading ? '···' : (currentAuthMode === 'signin' ? 'Sign In' : 'Create Account');
+    }
+    function showAuthError(msg) { authError.textContent = msg; }
+    function clearAuthError()   { authError.textContent = ''; }
+
+    // ── LOGOUT ────────────────────────────────────────
+    async function handleLogout() {
+      setSyncState('syncing');
+      await supa.auth.signOut();
+      setSyncState('synced');
+      showToast('You have been signed out.', 'info');
+    }
+
+    // ── INIT APP ──────────────────────────────────────
+    function initApp() {
+      if (currentUser?.email) navUserEmail.textContent = currentUser.email;
+      setSyncState('synced');
+      showPage('today');
+      initTodayPage(); // Stage 2 — renders instantly from localStorage
+      initFocusPage(); // Stage 3
+      initSettingsPage(); // Stage 5
+      syncPullOnLogin(); // Stage 7 — pull cloud data and re-render
+    }
+
+    // ── NAVIGATION ────────────────────────────────────
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      const target = document.getElementById('page-' + pageId);
+      if (target) target.classList.add('active');
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.page === pageId));
+      document.querySelectorAll('.nav-mobile-tab').forEach(t => t.classList.toggle('active', t.dataset.page === pageId));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (pageId === 'review') initReviewPage();
+    }
+
+    // ── SYNC STATE ────────────────────────────────────
+    function setSyncState(state) {
+      syncPill.className = 'sync-pill ' + state;
+      const labels = { synced: 'Synced', syncing: 'Syncing…', error: 'Error' };
+      syncLabel.textContent = labels[state] || 'Synced';
+    }
+
+    // ── TOAST SYSTEM ──────────────────────────────────
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = 'toast ' + type;
+      toast.textContent = message;
+      toastContainer.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add('removing');
+        setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 220);
+      }, 3000);
+    }
+
+    // ── KEYBOARD SUPPORT ──────────────────────────────
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !authScreen.classList.contains('hidden')) handleAuth();
+    });
+
+
+    /* ══════════════════════════════════════════════════
+       STAGE 2 — TODAY PAGE
+    ══════════════════════════════════════════════════ */
+
+    // ── DATA DEFINITIONS ─────────────────────────────
+
+    const PILLARS = [
+      {
+        id: 'career', name: 'Career', dotClass: 'career',
+        items: [
+          { id: 'c1', label: 'Study session completed' },
+          { id: 'c2', label: 'Revised notes before sleep' },
+          { id: 'c3', label: 'Business / YT work done' },
+          { id: 'c4', label: 'Research done' },
+        ]
+      },
+      {
+        id: 'physical', name: 'Physical', dotClass: 'physical',
+        items: [
+          { id: 'p1', label: 'Gym or home workout' },
+          { id: 'p2', label: 'Stretching done' },
+          { id: 'p3', label: 'Drank 3L+ water' },
+          { id: 'p4', label: 'All 3 meals hit' },
+        ]
+      },
+      {
+        id: 'spiritual', name: 'Spiritual', dotClass: 'spiritual',
+        items: [
+          { id: 's1', label: 'Mantra chanting / Jap done' },
+          { id: 's2', label: 'Brahmi — 10 minutes' },
+          { id: 's3', label: 'Mantra after workout' },
+          { id: 's4', label: 'In bed on time' },
+        ]
+      }
+    ];
+
+    const HABITS = [
+      { id: 'h1', label: 'Study 3–4 hours' },
+      { id: 'h2', label: 'Business / YT 3–4 hours' },
+      { id: 'h3', label: 'Gym + Stretching' },
+      { id: 'h4', label: 'All 3 meals hit' },
+      { id: 'h5', label: '3L water' },
+      { id: 'h6', label: 'No PMO' },
+      { id: 'h7', label: 'Mantra chanting' },
+      { id: 'h8', label: 'In bed on time' },
+    ];
+
+    const DEFAULT_QUOTE = 'Jai Bholenath. Give your best today. 🔱';
+
+    let intentionSavedTimer = null;
+
+    // ── getTodayKey ───────────────────────────────────
+    // Returns local date as YYYY-MM-DD
+    function getTodayKey() {
+      const d   = new Date();
+      const y   = d.getFullYear();
+      const m   = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    // ── formatMinutes ─────────────────────────────────
+    function formatMinutes(totalSec) {
+      if (!totalSec || totalSec <= 0) return '—';
+      const mins = Math.floor(totalSec / 60);
+      if (mins < 60) return `${mins}m`;
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      return m > 0 ? `${h}h ${m}m` : `${h}h`;
+    }
+
+    // ── getFormattedDate ──────────────────────────────
+    function getFormattedDate() {
+      const d = new Date();
+      const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      return `${DAYS[d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+    }
+
+    // ── getUsername ───────────────────────────────────
+    function getUsername() {
+      const metaName = currentUser?.user_metadata?.full_name;
+      if (metaName) return metaName.split(' ')[0];
+      return localStorage.getItem('dos_username') || '';
+    }
+
+    // ── CHECK SVG ─────────────────────────────────────
+    const CHECK_SVG = `<svg viewBox="0 0 12 10" width="12" height="10" aria-hidden="true"><polyline points="1,5 4,8 11,1" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+    /* ─────────────────────────────────────────────────
+       initTodayPage — entry point
+    ───────────────────────────────────────────────── */
+    function initTodayPage() {
+      renderGreeting();
+      loadIntention();
+      calculateStreak();
+      renderMetrics();
+      renderPillars();
+      renderHabits();
+      loadQuote();
+    }
+
+    /* ─────────────────────────────────────────────────
+       renderGreeting
+    ───────────────────────────────────────────────── */
+    function renderGreeting() {
+      document.getElementById('today-date-line').textContent = getFormattedDate();
+      const hour = new Date().getHours();
+      const name = getUsername();
+      const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+      document.getElementById('today-greeting').textContent = name ? `${greet}, ${name}.` : `${greet}.`;
+    }
+
+    /* ─────────────────────────────────────────────────
+       loadIntention
+    ───────────────────────────────────────────────── */
+    let intentionSyncTimer = null;
+
+    function loadIntention() {
+      const key   = `dos_intention_${getTodayKey()}`;
+      const input = document.getElementById('today-intention');
+      input.value = localStorage.getItem(key) || '';
+      input.oninput = () => {
+        localStorage.setItem(key, input.value);
+        flashSaved();
+        // Debounced sync — fires 1500ms after last keystroke
+        clearTimeout(intentionSyncTimer);
+        intentionSyncTimer = setTimeout(() => {
+          syncPushDailyData(getTodayKey());
+        }, 1500);
+      };
+    }
+
+    function flashSaved() {
+      const el = document.getElementById('today-intention-saved');
+      el.classList.add('visible');
+      clearTimeout(intentionSavedTimer);
+      intentionSavedTimer = setTimeout(() => el.classList.remove('visible'), 2000);
+    }
+
+    /* ─────────────────────────────────────────────────
+       calculateStreak
+    ───────────────────────────────────────────────── */
+    function calculateStreak() {
+      const today  = getTodayKey();
+      let streak   = JSON.parse(localStorage.getItem('dos_streak') || 'null');
+
+      if (!streak) {
+        streak = { count: 1, lastDate: today };
+      } else if (streak.lastDate === today) {
+        // Already counted today — no change
+      } else {
+        const diffMs  = new Date(today) - new Date(streak.lastDate);
+        const diffDay = Math.round(diffMs / 86400000);
+        if (diffDay === 1) {
+          streak.count += 1;
+          streak.lastDate = today;
+        } else {
+          streak.count    = 1;
+          streak.lastDate = today;
+        }
+      }
+
+      localStorage.setItem('dos_streak', JSON.stringify(streak));
+      renderStreak(streak.count);
+      syncPushSettings(); // keep streak in sync across devices
+    }
+
+    function renderStreak(count) {
+      const el = document.getElementById('today-streak');
+      el.textContent = (count && count > 0) ? `🔥 Day ${count} streak` : 'Start your streak today';
+    }
+
+    /* ─────────────────────────────────────────────────
+       renderMetrics
+    ───────────────────────────────────────────────── */
+    function renderMetrics() {
+      const today    = getTodayKey();
+      const sessions = JSON.parse(localStorage.getItem('dos_sessions') || '[]');
+
+      // Focus today (seconds)
+      const todaySec = sessions
+        .filter(s => s.date === today && s.completed)
+        .reduce((acc, s) => acc + (s.duration || 0), 0);
+
+      // Habits
+      const habitItems  = getHabitItems();
+      const totalHabits = habitItems.length;
+      const doneHabits  = habitItems.filter(h => localStorage.getItem(`dos_habit_${h.id}_${today}`) === 'true').length;
+      const allHabitsDone = totalHabits > 0 && doneHabits === totalHabits;
+
+      // Streak
+      const streak = JSON.parse(localStorage.getItem('dos_streak') || '{"count":0}');
+
+      // Week focus
+      const weekSec = getWeekFocusSeconds(sessions);
+
+      document.getElementById('today-metrics').innerHTML = `
+        <div class="metric-card">
+          <div class="metric-label">Focus Today</div>
+          <div class="metric-value">${formatMinutes(todaySec)}</div>
+          <div class="metric-sub">of focus</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Habits Done</div>
+          <div class="metric-value${allHabitsDone && totalHabits > 0 ? ' all-done' : ''}">${doneHabits} / ${totalHabits}</div>
+          <div class="metric-sub">habits complete</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Day Streak</div>
+          <div class="metric-value">${streak.count > 0 ? streak.count + ' 🔥' : '—'}</div>
+          <div class="metric-sub">day streak</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Week Focus</div>
+          <div class="metric-value">${formatMinutes(weekSec)}</div>
+          <div class="metric-sub">this week</div>
+        </div>
+      `;
+    }
+
+    function getWeekFocusSeconds(sessions) {
+      const now    = new Date();
+      const day    = now.getDay();
+      // Align to Monday (day 1). Sunday = 0 → -6
+      const offset = day === 0 ? -6 : 1 - day;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() + offset);
+      monday.setHours(0, 0, 0, 0);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      sunday.setHours(23, 59, 59, 999);
+
+      return sessions
+        .filter(s => {
+          if (!s.completed || !s.date) return false;
+          const d = new Date(s.date);
+          return d >= monday && d <= sunday;
+        })
+        .reduce((acc, s) => acc + (s.duration || 0), 0);
+    }
+
+    /* ─────────────────────────────────────────────────
+       renderPillars
+    ───────────────────────────────────────────────── */
+    function getPillarItems(pillarId) {
+      const defaults = PILLARS.find(p => p.id === pillarId)?.items || [];
+      try {
+        const stored = localStorage.getItem(`dos_pillar_${pillarId}_items`);
+        if (stored) return JSON.parse(stored);
+      } catch(e) {}
+      return defaults;
+    }
+
+    function renderPillars() {
+      const today     = getTodayKey();
+      const container = document.getElementById('today-pillars');
+      container.innerHTML = '';
+
+      PILLARS.forEach(pillar => {
+        const items = getPillarItems(pillar.id);
+        const checkedCount = items.filter(item =>
+          localStorage.getItem(`dos_pillar_${pillar.id}_${item.id}_${today}`) === 'true'
+        ).length;
+        const allDone = items.length > 0 && checkedCount === items.length;
+
+        const card = document.createElement('div');
+        card.className = `pillar-card${allDone ? ' win-state' : ''}`;
+        card.id = `pillar-card-${pillar.id}`;
+
+        const itemsHTML = items.map(item => {
+          const checked = localStorage.getItem(`dos_pillar_${pillar.id}_${item.id}_${today}`) === 'true';
+          return `
+            <div class="checklist-item${checked ? ' checked' : ''}"
+                 id="pillar-item-${pillar.id}-${item.id}"
+                 onclick="togglePillarItem('${pillar.id}','${item.id}')">
+              <div class="check-box">${CHECK_SVG}</div>
+              <span class="check-label">${escHtml ? escHtml(item.label) : item.label}</span>
+            </div>`;
+        }).join('');
+
+        const savedNotes = localStorage.getItem(`dos_notes_${pillar.id}_${today}`) || '';
+
+        card.innerHTML = `
+          <div class="pillar-header">
+            <div class="pillar-header-left">
+              <div class="pillar-dot ${pillar.dotClass}"></div>
+              <span class="pillar-name">${pillar.name}</span>
+            </div>
+            <span class="pillar-badge${allDone ? ' win' : ''}" id="pillar-badge-${pillar.id}">
+              ${allDone ? 'WIN ✓' : `${checkedCount}/${items.length}`}
+            </span>
+          </div>
+          <div class="pillar-divider"></div>
+          ${itemsHTML}
+          <div class="pillar-notes-label">Notes</div>
+          <textarea class="pillar-notes-textarea"
+                    placeholder="Any notes for today…"
+                    oninput="savePillarNotes('${pillar.id}', this.value)"
+          >${savedNotes}</textarea>
+
+```
+    `;
+    container.appendChild(card);
+  });
+}
+
+/* ─────────────────────────────────────────────────
+   togglePillarItem
+───────────────────────────────────────────────── */
+function togglePillarItem(pillarId, itemId) {
+  const today        = getTodayKey();
+  const key          = `dos_pillar_${pillarId}_${itemId}_${today}`;
+  const isNowChecked = localStorage.getItem(key) !== 'true';
+  localStorage.setItem(key, String(isNowChecked));
+  syncPushDailyData(today);
+
+  const itemEl = document.getElementById(`pillar-item-${pillarId}-${itemId}`);
+  if (itemEl) itemEl.classList.toggle('checked', isNowChecked);
+
+  const items = getPillarItems(pillarId);
+
+  const checkedCount = items.filter(item =>
+    localStorage.getItem(`dos_pillar_${pillarId}_${item.id}_${today}`) === 'true'
+  ).length;
+  const allDone = items.length > 0 && checkedCount === items.length;
+
+  const badge = document.getElementById(`pillar-badge-${pillarId}`);
+  if (badge) {
+    badge.textContent = allDone ? 'WIN ✓' : `${checkedCount}/${items.length}`;
+    badge.className   = allDone ? 'pillar-badge win' : 'pillar-badge';
+  }
+  const card = document.getElementById(`pillar-card-${pillarId}`);
+  if (card) card.classList.toggle('win-state', allDone);
+
+  renderMetrics();
+}
+
+let _notesSyncTimers = {};
+
+function savePillarNotes(pillarId, value) {
+  const today = getTodayKey();
+  localStorage.setItem(`dos_notes_${pillarId}_${today}`, value);
+  // Debounced sync
+  clearTimeout(_notesSyncTimers[pillarId]);
+  _notesSyncTimers[pillarId] = setTimeout(() => {
+    syncPushDailyData(today);
+  }, 1500);
+}
+
+/* ─────────────────────────────────────────────────
+   renderHabits
+───────────────────────────────────────────────── */
+function getHabitItems() {
+  try {
+    const stored = localStorage.getItem('dos_habit_items');
+    if (stored) return JSON.parse(stored);
+  } catch(e) {}
+  return HABITS;
+}
+
+function renderHabits() {
+  const today   = getTodayKey();
+  const listEl  = document.getElementById('habit-list');
+  const habits  = getHabitItems();
+
+  listEl.innerHTML = habits.map(habit => {
+    const checked = localStorage.getItem(`dos_habit_${habit.id}_${today}`) === 'true';
+    return `
+      <div class="checklist-item${checked ? ' checked' : ''}"
+           id="habit-item-${habit.id}"
+           onclick="toggleHabit('${habit.id}')">
+        <div class="check-box">${CHECK_SVG}</div>
+        <span class="check-label">${habit.label}</span>
+      </div>`;
+  }).join('');
+
+  updateHabitCount();
+}
+
+/* ─────────────────────────────────────────────────
+   toggleHabit
+───────────────────────────────────────────────── */
+function toggleHabit(habitId) {
+  const today        = getTodayKey();
+  const key          = `dos_habit_${habitId}_${today}`;
+  const isNowChecked = localStorage.getItem(key) !== 'true';
+  localStorage.setItem(key, String(isNowChecked));
+  syncPushDailyData(today);
+
+  const itemEl = document.getElementById(`habit-item-${habitId}`);
+  if (itemEl) itemEl.classList.toggle('checked', isNowChecked);
+
+  updateHabitCount();
+  renderMetrics();
+}
+
+function updateHabitCount() {
+  const today   = getTodayKey();
+  const habits  = getHabitItems();
+  const done    = habits.filter(h => localStorage.getItem(`dos_habit_${h.id}_${today}`) === 'true').length;
+  const total   = habits.length;
+  const allDone = done === total && total > 0;
+
+  const pill = document.getElementById('habit-count-pill');
+  if (pill) {
+    pill.textContent = `${done} / ${total}`;
+    pill.className   = allDone ? 'habit-count-pill all-done' : 'habit-count-pill';
+  }
+  const card = document.getElementById('habit-card');
+  if (card) card.classList.toggle('win-state', allDone);
+}
+
+/* ─────────────────────────────────────────────────
+   Daily Quote
+───────────────────────────────────────────────── */
+function loadQuote() {
+  const saved = localStorage.getItem('dos_quote') || DEFAULT_QUOTE;
+  document.getElementById('today-quote-text').textContent = saved;
+}
+
+function handleQuoteClick() {
+  const textEl   = document.getElementById('today-quote-text');
+  const inputEl  = document.getElementById('today-quote-input');
+  const editIcon = document.querySelector('.today-quote-edit-icon');
+
+  if (inputEl.style.display === 'block') return;
+
+  inputEl.value            = textEl.textContent;
+  textEl.style.display     = 'none';
+  editIcon.style.display   = 'none';
+  inputEl.style.display    = 'block';
+  inputEl.focus();
+  inputEl.select();
+
+  function commitQuote() {
+    const val = inputEl.value.trim() || DEFAULT_QUOTE;
+    localStorage.setItem('dos_quote', val);
+    textEl.textContent     = val;
+    textEl.style.display   = '';
+    editIcon.style.display = '';
+    inputEl.style.display  = 'none';
+    // Remove listeners
+    inputEl.onkeydown = null;
+    inputEl.onblur    = null;
+    syncPushDailyData(getTodayKey());
+  }
+
+  inputEl.onkeydown = (e) => {
+    if (e.key === 'Enter')  { e.preventDefault(); commitQuote(); }
+    if (e.key === 'Escape') { inputEl.value = textEl.textContent || DEFAULT_QUOTE; commitQuote(); }
+  };
+  inputEl.onblur = commitQuote;
+}
+
+// Prevent quote wrapper click from firing when interacting with input
+document.getElementById('today-quote-input').addEventListener('click', e => e.stopPropagation());
+
+
+/* ══════════════════════════════════════════════════
+   STAGE 3 — FOCUS TIMER PAGE
+══════════════════════════════════════════════════ */
+
+// ── CONSTANTS ─────────────────────────────────────
+const CIRCUMFERENCE = 691.15; // 2 * π * 110
+
+function getFocusCircumference() { return CIRCUMFERENCE; }
+
+// ── DEFAULT TAGS ──────────────────────────────────
+const DEFAULT_TAGS = [
+  { id: 'study',    name: 'Study',        color: '#5a9fd4' },
+  { id: 'business', name: 'Business / YT', color: '#d4a85a' },
+  { id: 'gym',      name: 'Gym',           color: '#6db86d' },
+  { id: 'deepwork', name: 'Deep Work',     color: '#c8845a' },
+  { id: 'reading',  name: 'Reading',       color: '#9b8fd4' }
+];
+
+function getFocusTags() {
+  try { return JSON.parse(localStorage.getItem('dos_tags')) || DEFAULT_TAGS; }
+  catch { return DEFAULT_TAGS; }
+}
+function saveFocusTags(tags) { localStorage.setItem('dos_tags', JSON.stringify(tags)); }
+
+// ── TIMER STATE ───────────────────────────────────
+let TIMER = {
+  mode:        'timer',
+  state:       'idle',
+  duration:    25 * 60,
+  elapsed:     0,
+  startTs:     null,
+  totalPaused: 0,
+  pausedAt:    null,
+  tag:         null,
+  intervalId:  null,
+  pomoPhase:     'focus',
+  pomoIndex:     0,
+  pomoCycleCount: 1,
+  pomoSettings: { focusMins: 25, shortBreakMins: 5, longBreakMins: 15, longBreakAfter: 4 }
+};
+
+// ── INIT FOCUS PAGE ───────────────────────────────
+function initFocusPage() {
+  // Load pomo settings
+  try {
+    const saved = JSON.parse(localStorage.getItem('dos_pomo_settings'));
+    if (saved) TIMER.pomoSettings = { ...TIMER.pomoSettings, ...saved };
+  } catch {}
+
+  // Set initial tag
+  const tags = getFocusTags();
+  TIMER.tag = tags[0] || DEFAULT_TAGS[0];
+
+  renderFocusTags();
+  renderFocusControls();
+  updateRingArc(1);
+  updateRingInner();
+  renderFocusGoalBar();
+  renderRecentSessions();
+  renderPomoDots();
+  applyRingTagColor();
+}
+
+// ── TAG RENDERING ─────────────────────────────────
+function renderFocusTags() {
+  const tags = getFocusTags();
+  const row  = document.getElementById('focus-tag-row');
+  row.innerHTML = '';
+  tags.forEach(tag => {
+    const r = parseInt(tag.color.slice(1,3),16);
+    const g = parseInt(tag.color.slice(3,5),16);
+    const b = parseInt(tag.color.slice(5,7),16);
+    const chip = document.createElement('button');
+    chip.className = 'focus-tag-chip' + (TIMER.tag && TIMER.tag.id === tag.id ? ' selected' : '');
+    chip.setAttribute('data-tag-id', tag.id);
+    chip.style.background = `rgba(${r},${g},${b},0.08)`;
+    chip.style.color = tag.color;
+    chip.textContent = tag.name;
+    chip.onclick = () => focusSelectTag(tag);
+    row.appendChild(chip);
+  });
+}
+
+function focusSelectTag(tag) {
+  TIMER.tag = tag;
+  document.querySelectorAll('.focus-tag-chip').forEach(c => {
+    c.classList.toggle('selected', c.getAttribute('data-tag-id') === tag.id);
+  });
+  document.getElementById('focus-ring-tag').textContent = tag.name;
+  applyRingTagColor();
+}
+
+function applyRingTagColor() {
+  const arc = document.getElementById('focus-ring-arc');
+  const color = TIMER.tag ? TIMER.tag.color : '#a8a8bc';
+  arc.style.stroke = color;
+  arc.style.filter = `drop-shadow(0 0 8px ${hexToRgba(color, 0.5)})`;
+
+  if (TIMER.state === 'running') {
+    document.getElementById('focus-time-display').style.color = color;
+  }
+}
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// ── ADD TAG ───────────────────────────────────────
+function focusToggleAddTag() {
+  const form = document.getElementById('focus-tag-add-form');
+  form.classList.toggle('open');
+  if (form.classList.contains('open')) {
+    document.getElementById('focus-tag-name-input').focus();
+  }
+}
+
+function focusAddTag() {
+  const name  = document.getElementById('focus-tag-name-input').value.trim();
+  const color = document.getElementById('focus-tag-color-input').value;
+  if (!name) { showToast('Please enter a tag name.', 'error'); return; }
+  const tags = getFocusTags();
+  const newTag = { id: 'tag_' + Date.now(), name, color };
+  tags.push(newTag);
+  saveFocusTags(tags);
+  syncPushSettings();
+  TIMER.tag = newTag;
+  renderFocusTags();
+  applyRingTagColor();
+  document.getElementById('focus-ring-tag').textContent = newTag.name;
+  document.getElementById('focus-tag-name-input').value = '';
+  document.getElementById('focus-tag-add-form').classList.remove('open');
+}
+
+// ── MODE SWITCHING ────────────────────────────────
+function focusSwitchMode(mode) {
+  if (mode === TIMER.mode) return;
+  if (TIMER.state === 'running') {
+    showToast('Stop current session before switching modes.', 'info');
+    return;
+  }
+  TIMER.mode  = mode;
+  TIMER.state = 'idle';
+  focusResetState();
+
+  document.querySelectorAll('.focus-mode-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+
+  // Show/hide duration row and pomo settings
+  document.getElementById('focus-duration-row').style.display = mode === 'timer' ? 'flex' : 'none';
+  const pomoWrap = document.getElementById('focus-pomo-settings-wrap');
+  pomoWrap.classList.toggle('visible', mode === 'pomodoro');
+
+  if (mode === 'pomodoro') { TIMER.pomoPhase = 'focus'; TIMER.pomoIndex = 0; }
+
+  renderFocusControls();
+  renderPomoDots();
+  updateRingArc(1);
+  updateRingInner();
+}
+
+// ── DURATION SELECTOR ─────────────────────────────
+function focusSetDuration(secs) {
+  if (TIMER.state !== 'idle') return;
+  TIMER.duration = secs;
+  document.querySelectorAll('.focus-dur-chip').forEach(c => {
+    c.classList.toggle('active', parseInt(c.dataset.dur) === secs);
+  });
+  document.getElementById('focus-dur-custom').value = '';
+  updateRingArc(1);
+  updateRingInner();
+}
+
+function focusSetCustomDuration(val) {
+  const mins = parseInt(val);
+  if (!mins || mins < 1 || mins > 180) return;
+  TIMER.duration = mins * 60;
+  document.querySelectorAll('.focus-dur-chip').forEach(c => c.classList.remove('active'));
+  updateRingArc(1);
+  updateRingInner();
+}
+
+// ── RING UPDATES ──────────────────────────────────
+function updateRingArc(progress) {
+  const arc  = document.getElementById('focus-ring-arc');
+  const circ = getFocusCircumference();
+  const offset = circ * (1 - Math.max(0, Math.min(1, progress)));
+  arc.style.strokeDasharray  = circ;
+  arc.style.strokeDashoffset = offset;
+  arc.style.opacity = (TIMER.state === 'paused') ? '0.5' : '1';
+}
+
+function updateRingInner() {
+  const timeEl   = document.getElementById('focus-time-display');
+  const statusEl = document.getElementById('focus-ring-status');
+  const tagEl    = document.getElementById('focus-ring-tag');
+
+  tagEl.textContent = TIMER.tag ? TIMER.tag.name : '—';
+
+  // Time display
+  if (TIMER.mode === 'timer') {
+    const rem = Math.max(0, TIMER.duration - TIMER.elapsed);
+    timeEl.textContent = formatFocusTime(rem, false);
+  } else if (TIMER.mode === 'stopwatch') {
+    timeEl.textContent = formatFocusTime(TIMER.elapsed, TIMER.elapsed >= 3600);
+  } else {
+    // Pomodoro
+    const phaseDur = getFocusPomoPhaseDuration();
+    const rem = Math.max(0, phaseDur - TIMER.elapsed);
+    timeEl.textContent = formatFocusTime(rem, false);
+  }
+
+  // Color
+  if (TIMER.state === 'running') {
+    timeEl.style.color = TIMER.tag ? TIMER.tag.color : 'var(--text)';
+  } else {
+    timeEl.style.color = 'var(--text)';
+  }
+
+  // Status
+  if (TIMER.state === 'idle')   statusEl.textContent = 'Ready';
+  if (TIMER.state === 'running') {
+    if (TIMER.mode === 'pomodoro') {
+      const phase = TIMER.pomoPhase === 'focus'
+        ? `Focus ${TIMER.pomoIndex + 1} of ${TIMER.pomoSettings.longBreakAfter}`
+        : TIMER.pomoPhase === 'short' ? 'Short Break' : 'Long Break';
+      statusEl.textContent = phase;
+    } else {
+      statusEl.textContent = 'Running';
+    }
+  }
+  if (TIMER.state === 'paused') statusEl.textContent = 'Paused';
+}
+
+function formatFocusTime(secs, showHours) {
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  const s = Math.floor(secs % 60);
+  if (showHours || h > 0) {
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function getFocusRingProgress() {
+  if (TIMER.mode === 'timer') {
+    return (TIMER.duration - TIMER.elapsed) / TIMER.duration;
+  } else if (TIMER.mode === 'stopwatch') {
+    const CAP = 3600; // 60 min cap for visual
+    return Math.min(TIMER.elapsed / CAP, 1);
+  } else {
+    const phaseDur = getFocusPhaseDurationSecs(TIMER.pomoPhase);
+    return (phaseDur - TIMER.elapsed) / phaseDur;
+  }
+}
+
+// ── CONTROLS ──────────────────────────────────────
+function renderFocusControls() {
+  const el = document.getElementById('focus-controls');
+  if (TIMER.state === 'idle') {
+    el.innerHTML = `<button class="focus-btn-primary" onclick="focusStart()">Start Session</button>`;
+  } else if (TIMER.state === 'running') {
+    el.innerHTML = `
+      <button class="focus-btn-secondary" onclick="focusPause()">Pause</button>
+      <button class="focus-btn-danger"    onclick="focusAbandonRequest()">Abandon</button>`;
+  } else if (TIMER.state === 'paused') {
+    el.innerHTML = `
+      <button class="focus-btn-primary"   onclick="focusResume()">Resume</button>
+      <button class="focus-btn-secondary" onclick="focusStopAndSave()">Stop &amp; Save</button>
+      <button class="focus-btn-danger"    onclick="focusAbandonRequest()">Abandon</button>`;
+  }
+}
+
+// ── START / PAUSE / RESUME / STOP ─────────────────
+function focusStart() {
+  focusResetState();
+  TIMER.state   = 'running';
+  TIMER.startTs = Date.now();
+
+  if (TIMER.mode === 'pomodoro') {
+    TIMER.duration = getFocusPomoPhaseDuration();
+    TIMER.pomoPhase = 'focus';
+    TIMER.pomoIndex = 0;
+  }
+
+  focusStartTick();
+  renderFocusControls();
+  applyRingTagColor();
+  updateRingInner();
+
+  // Switch arc transition to linear for timer feel
+  const arc = document.getElementById('focus-ring-arc');
+  arc.classList.remove('idle-transition');
+}
+
+function focusPause() {
+  if (TIMER.state !== 'running') return;
+  clearInterval(TIMER.intervalId);
+  TIMER.state    = 'paused';
+  TIMER.pausedAt = Date.now();
+  renderFocusControls();
+  updateRingInner();
+  updateRingArc(getFocusRingProgress());
+}
+
+function focusResume() {
+  if (TIMER.state !== 'paused') return;
+  TIMER.totalPaused += (Date.now() - TIMER.pausedAt) / 1000;
+  TIMER.pausedAt    = null;
+  TIMER.state       = 'running';
+  focusStartTick();
+  renderFocusControls();
+  updateRingInner();
+}
+
+function focusStopAndSave() {
+  clearInterval(TIMER.intervalId);
+  focusSaveSession();
+  focusResetState();
+  renderFocusControls();
+  updateRingArc(1);
+  updateRingInner();
+  document.getElementById('focus-time-display').style.color = 'var(--text)';
+}
+
+function focusAbandonRequest() {
+  if (TIMER.elapsed > 5 * 60) {
+    // Show inline banner
+    if (TIMER.state === 'running') focusPause();
+    document.getElementById('focus-abandon-banner').classList.add('visible');
+  } else {
+    focusConfirmAbandon();
+  }
+}
+
+function focusHideAbandonBanner() {
+  document.getElementById('focus-abandon-banner').classList.remove('visible');
+  // If we auto-paused, resume
+  if (TIMER.state === 'paused') focusResume();
+}
+
+function focusConfirmAbandon() {
+  clearInterval(TIMER.intervalId);
+  document.getElementById('focus-abandon-banner').classList.remove('visible');
+  focusResetState();
+  renderFocusControls();
+  updateRingArc(1);
+  updateRingInner();
+  document.getElementById('focus-time-display').style.color = 'var(--text)';
+  showToast('Session abandoned.', 'info');
+}
+
+function focusResetState() {
+  clearInterval(TIMER.intervalId);
+  TIMER.state       = 'idle';
+  TIMER.elapsed     = 0;
+  TIMER.startTs     = null;
+  TIMER.totalPaused = 0;
+  TIMER.pausedAt    = null;
+  TIMER.intervalId  = null;
+
+  if (TIMER.mode === 'pomodoro') {
+    TIMER.pomoPhase = 'focus';
+    TIMER.pomoIndex = 0;
+    renderPomoDots();
+  }
+
+  const arc = document.getElementById('focus-ring-arc');
+  arc.classList.add('idle-transition');
+}
+
+// ── TICK LOOP ─────────────────────────────────────
+function focusStartTick() {
+  clearInterval(TIMER.intervalId);
+  TIMER.intervalId = setInterval(focusTick, 250);
+}
+
+function focusTick() {
+  if (TIMER.state !== 'running' || !TIMER.startTs) return;
+  TIMER.elapsed = (Date.now() - TIMER.startTs) / 1000 - TIMER.totalPaused;
+
+  updateRingInner();
+  updateRingArc(getFocusRingProgress());
+
+  if (TIMER.mode === 'timer') {
+    if (TIMER.elapsed >= TIMER.duration) {
+      focusCompleteSession();
+    }
+  } else if (TIMER.mode === 'pomodoro') {
+    const phaseDur = getFocusPomoPhaseDuration();
+    if (TIMER.elapsed >= phaseDur) {
+      focusPomoAdvancePhase();
+    }
+  }
+}
+
+// ── COMPLETION ────────────────────────────────────
+function focusCompleteSession() {
+  clearInterval(TIMER.intervalId);
+  playFocusChime();
+  focusSaveSession();
+  showToast('Session complete ✓', 'success');
+  focusResetState();
+  renderFocusControls();
+  updateRingArc(1);
+  updateRingInner();
+  document.getElementById('focus-time-display').style.color = 'var(--text)';
+}
+
+function focusSaveSession() {
+  if (!TIMER.elapsed || TIMER.elapsed < 5) return; // skip trivial sessions
+  const session = {
+    id:          'sess_' + Date.now(),
+    date:        getTodayKey(),
+    tag:         TIMER.tag ? TIMER.tag.name : 'Focus',
+    tagColor:    TIMER.tag ? TIMER.tag.color : '#a8a8bc',
+    duration:    Math.round(TIMER.elapsed),
+    completedAt: new Date().toISOString(),
+    completed:   true,
+    mode:        TIMER.mode
+  };
+  const sessions = JSON.parse(localStorage.getItem('dos_sessions') || '[]');
+  sessions.push(session);
+  localStorage.setItem('dos_sessions', JSON.stringify(sessions));
+  syncPushSession(session);
+  renderFocusGoalBar();
+  renderRecentSessions();
+  renderMetrics();
+}
+
+// ── POMODORO LOGIC ────────────────────────────────
+function getFocusPomoPhaseDuration() {
+  return getFocusPhaseDurationSecs(TIMER.pomoPhase);
+}
+
+function getFocusPhaseDurationSecs(phase) {
+  const s = TIMER.pomoSettings;
+  if (phase === 'focus') return s.focusMins * 60;
+  if (phase === 'short') return s.shortBreakMins * 60;
+  return s.longBreakMins * 60;
+}
+
+function focusPomoAdvancePhase() {
+  clearInterval(TIMER.intervalId);
+
+  if (TIMER.pomoPhase === 'focus') {
+    // Save the focus session
+    focusSaveSession();
+    TIMER.elapsed = 0;
+    TIMER.startTs = Date.now();
+    TIMER.totalPaused = 0;
+
+    const nextIndex = TIMER.pomoIndex + 1;
+    const isLongBreak = nextIndex >= TIMER.pomoSettings.longBreakAfter;
+    TIMER.pomoPhase = isLongBreak ? 'long' : 'short';
+    TIMER.pomoIndex = isLongBreak ? 0 : nextIndex;
+
+    if (isLongBreak) {
+      showToast('Long break time! Well earned. 🎉', 'success');
+      TIMER.pomoCycleCount++;
+    } else {
+      showToast('Break time! 5 minutes.', 'info');
+    }
+  } else {
+    // Break over → back to focus
+    TIMER.elapsed = 0;
+    TIMER.startTs = Date.now();
+    TIMER.totalPaused = 0;
+    TIMER.pomoPhase = 'focus';
+    showToast('Back to focus! 💪', 'success');
+  }
+
+  playFocusChime();
+  renderPomoDots();
+  updateRingInner();
+  applyRingTagColor();
+  focusStartTick();
+}
+
+function renderPomoDots() {
+  const container = document.getElementById('focus-pomo-dots');
+  if (TIMER.mode !== 'pomodoro') { container.innerHTML = ''; return; }
+  const total = TIMER.pomoSettings.longBreakAfter;
+  container.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'focus-pomo-dot';
+    if (i < TIMER.pomoIndex) dot.classList.add('filled');
+    if (i === TIMER.pomoIndex && TIMER.pomoPhase === 'focus') dot.classList.add('active-dot');
+    container.appendChild(dot);
+  }
+}
+
+// ── POMODORO SETTINGS ─────────────────────────────
+function focusTogglePomoSettings() {
+  document.getElementById('focus-pomo-settings-panel').classList.toggle('open');
+}
+
+function focusSavePomoSettings() {
+  const s = {
+    focusMins:      parseInt(document.getElementById('pomo-focus-mins').value)  || 25,
+    shortBreakMins: parseInt(document.getElementById('pomo-short-break').value) || 5,
+    longBreakMins:  parseInt(document.getElementById('pomo-long-break').value)  || 15,
+    longBreakAfter: parseInt(document.getElementById('pomo-long-after').value)  || 4
+  };
+  TIMER.pomoSettings = s;
+  localStorage.setItem('dos_pomo_settings', JSON.stringify(s));
+  syncPushSettings();
+  // Reset pomodoro cycle
+  TIMER.pomoIndex = 0;
+  TIMER.pomoPhase = 'focus';
+  document.getElementById('focus-pomo-settings-panel').classList.remove('open');
+  renderPomoDots();
+  if (TIMER.state === 'idle') { TIMER.duration = s.focusMins * 60; updateRingInner(); }
+  showToast('Pomodoro settings saved.', 'success');
+}
+
+// ── GOAL BAR ──────────────────────────────────────
+function renderFocusGoalBar() {
+  const goalHrs = parseFloat(localStorage.getItem('dos_focus_goal_hrs')) || 4;
+  const goalSec = goalHrs * 3600;
+  const today   = getTodayKey();
+  const sessions = JSON.parse(localStorage.getItem('dos_sessions') || '[]');
+  const doneSec  = sessions
+    .filter(s => s.date === today && s.completed)
+    .reduce((a, s) => a + (s.duration || 0), 0);
+
+  const pct = Math.min(doneSec / goalSec, 1);
+
+  const fillEl  = document.getElementById('focus-goal-fill');
+  const valueEl = document.getElementById('focus-goal-value');
+
+  fillEl.style.width = (pct * 100) + '%';
+
+  if (pct >= 1) {
+    fillEl.classList.add('goal-reached');
+    valueEl.classList.add('goal-reached');
+    valueEl.textContent = 'Goal reached ✓';
+  } else {
+    fillEl.classList.remove('goal-reached');
+    valueEl.classList.remove('goal-reached');
+    valueEl.textContent = `${formatMinutes(doneSec)} of ${goalHrs % 1 === 0 ? goalHrs + 'h' : goalHrs + 'h'}`;
+  }
+}
+
+// ── RECENT SESSIONS ───────────────────────────────
+function renderRecentSessions() {
+  const today    = getTodayKey();
+  const sessions = JSON.parse(localStorage.getItem('dos_sessions') || '[]');
+  const todaySessions = sessions
+    .filter(s => s.date === today && s.completed)
+    .slice(-5)
+    .reverse();
+
+  const container = document.getElementById('focus-recent-list');
+  if (todaySessions.length === 0) {
+    container.innerHTML = `<div class="focus-no-sessions">No sessions yet today. Start your first one.</div>`;
+    return;
+  }
+
+  container.innerHTML = todaySessions.map(s => {
+    const t = new Date(s.completedAt);
+    const timeStr = t.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    return `
+      <div class="focus-session-row">
+        <div class="focus-session-dot" style="background:${s.tagColor || '#a8a8bc'}"></div>
+        <div class="focus-session-info">
+          <div class="focus-session-name">${s.tag || 'Focus'}</div>
+          <div class="focus-session-dur">${formatMinutes(s.duration)}</div>
+        </div>
+        <div class="focus-session-time">${timeStr}</div>
+      </div>`;
+  }).join('');
+}
+
+// ── CHIME (Web Audio API) ─────────────────────────
+function playFocusChime() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [[880, 0], [660, 0.2], [440, 0.4]].forEach(([freq, delay]) => {
+      const osc   = ctx.createOscillator();
+      const gain  = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type      = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.5);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + 0.5);
+    });
+  } catch {}
+}
+
+
+/* ══════════════════════════════════════════════════
+   STAGE 4 — REVIEW PAGE
+══════════════════════════════════════════════════ */
+
+let reviewTab  = 'weekly';
+let weekOffset = 0;
+
+const REVIEW_MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const REVIEW_DAYS_FULL    = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const REVIEW_DAYS_SHORT   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+// ── Helpers ───────────────────────────────────────
+
+function getWeekStart(offset) {
+  const now  = new Date();
+  const dow  = now.getDay(); // 0 Sun … 6 Sat
+  // Days since Monday (treat Sunday as 6)
+  const sinceMon = (dow + 6) % 7;
+  const mon = new Date(now);
+  mon.setHours(0, 0, 0, 0);
+  mon.setDate(now.getDate() - sinceMon + offset * 7);
+  return mon;
+}
+
+function getWeekDates(offset) {
+  const mon = getWeekStart(offset);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(mon);
+    d.setDate(mon.getDate() + i);
+    return d;
+  });
+}
+
+function dateToKey(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function getWeekLabel(offset) {
+  const dates = getWeekDates(offset);
+  const s = dates[0], e = dates[6];
+  const sm = REVIEW_MONTHS_SHORT[s.getMonth()];
+  const em = REVIEW_MONTHS_SHORT[e.getMonth()];
+  if (sm === em) {
+    return `${sm} ${s.getDate()} – ${e.getDate()}, ${e.getFullYear()}`;
+  }
+  return `${sm} ${s.getDate()} – ${em} ${e.getDate()}, ${e.getFullYear()}`;
+}
+
+function getSessionsForDate(dateKey) {
+  const all = JSON.parse(localStorage.getItem('dos_sessions') || '[]');
+  return all.filter(s => s.date === dateKey && s.completed);
+}
+
+function getSessionsForWeek(offset) {
+  const dates = getWeekDates(offset);
+  const keys  = new Set(dates.map(dateToKey));
+  const all   = JSON.parse(localStorage.getItem('dos_sessions') || '[]');
+  return all.filter(s => keys.has(s.date) && s.completed);
+}
+
+function getAllSessions() {
+  return JSON.parse(localStorage.getItem('dos_sessions') || '[]').filter(s => s.completed);
+}
+
+function fmtSecs(totalSec) {
+  if (!totalSec || totalSec <= 0) return '—';
+  const mins = Math.floor(totalSec / 60);
+  if (mins < 60) return `${mins}m`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
+function fmtSecsLong(totalSec) {
+  // Always h + m even if 0h
+  if (!totalSec || totalSec <= 0) return '—';
+  const mins = Math.floor(totalSec / 60);
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h === 0) return `${m}m`;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
+// ── initReviewPage ────────────────────────────────
+
+function initReviewPage() {
+  weekOffset = 0;
+  switchReviewTab(reviewTab, true);
+}
+
+// ── switchReviewTab ───────────────────────────────
+
+function switchReviewTab(tab, skipRender) {
+  reviewTab = tab;
+  document.getElementById('rtab-weekly').classList.toggle('active', tab === 'weekly');
+  document.getElementById('rtab-analytics').classList.toggle('active', tab === 'analytics');
+  document.getElementById('review-weekly-section').style.display    = tab === 'weekly'    ? '' : 'none';
+  document.getElementById('review-analytics-section').style.display = tab === 'analytics' ? '' : 'none';
+  if (!skipRender) {
+    if (tab === 'weekly')    renderWeeklySection();
+    if (tab === 'analytics') renderAnalyticsSection();
+  } else {
+    renderWeeklySection();
+    renderAnalyticsSection();
+  }
+}
+
+// ── shiftWeek ─────────────────────────────────────
+
+function shiftWeek(direction) {
+  const next = weekOffset + direction;
+  if (direction > 0 && next > 0) return; // can't go future
+  weekOffset = next;
+  renderWeeklySection();
+}
+
+// ── renderWeeklySection ───────────────────────────
+
+function renderWeeklySection() {
+  // A1: week navigator label & arrow state
+  document.getElementById('review-week-label').textContent = getWeekLabel(weekOffset);
+  const nextBtn = document.getElementById('review-week-next');
+  nextBtn.disabled = weekOffset >= 0;
+
+  // sessions for this week
+  const weekSessions = getSessionsForWeek(weekOffset);
+  const weekDates    = getWeekDates(weekOffset);
+  const todayKey     = getTodayKey();
+
+  // A2: metrics
+  const totalSec   = weekSessions.reduce((a, s) => a + (s.duration || 0), 0);
+  const sessionCnt = weekSessions.length;
+  const dayTotals  = weekDates.map(d => {
+    const k = dateToKey(d);
+    return weekSessions.filter(s => s.date === k).reduce((a, s) => a + (s.duration || 0), 0);
+  });
+  const maxDaySec  = Math.max(...dayTotals);
+  const maxDayIdx  = maxDaySec > 0 ? dayTotals.indexOf(maxDaySec) : -1;
+  const bestDay    = maxDayIdx >= 0 ? REVIEW_DAYS_FULL[maxDayIdx] : '—';
+  const avgSec     = Math.round(totalSec / 7);
+
+  document.getElementById('review-weekly-metrics').innerHTML = `
+    <div class="metric-card">
+      <div class="metric-label">Total Focus</div>
+      <div class="metric-value">${fmtSecs(totalSec)}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Sessions</div>
+      <div class="metric-value">${sessionCnt}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Best Day</div>
+      <div class="metric-value metric-value--md">${bestDay}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Daily Avg</div>
+      <div class="metric-value">${fmtSecs(avgSec)}</div>
+    </div>
+  `;
+
+  // A3: weekly goals
+  renderWeeklyGoals();
+
+  // A4: day-by-day
+  const maxDaySec = Math.max(...dayTotals, 1);
+  const dayRows = weekDates.map((d, i) => {
+    const isToday  = dateToKey(d) === todayKey;
+    const sec      = dayTotals[i];
+    const pct      = (sec / maxDaySec) * 100;
+    const timeStr  = sec > 0 ? fmtSecs(sec) : '';
+    return `
+      <div class="review-day-row">
+        <div class="review-day-name">
+          ${REVIEW_DAYS_FULL[i]}
+          ${isToday ? '<div class="review-day-today-dot"></div>' : ''}
+        </div>
+        <div class="review-day-bar-track">
+          <div class="review-day-bar-fill" style="width:${pct}%"></div>
+        </div>
+        <div class="review-day-time ${sec === 0 ? 'empty' : ''}">${sec === 0 ? '—' : timeStr}</div>
+      </div>`;
+  }).join('');
+  document.getElementById('review-days-list').innerHTML = dayRows;
+
+  // A5: focus by tag
+  renderTagBreakdown(weekSessions);
+}
+
+// ── renderTagBreakdown ────────────────────────────
+
+function renderTagBreakdown(sessions) {
+  const container = document.getElementById('review-tag-breakdown');
+  if (sessions.length === 0) {
+    container.innerHTML = `<div class="review-empty-msg">No focus sessions recorded this week.</div>`;
+    return;
+  }
+  const tagMap = {};
+  sessions.forEach(s => {
+    const name  = s.tag   || 'Focus';
+    const color = s.tagColor || '#a8a8bc';
+    if (!tagMap[name]) tagMap[name] = { color, sec: 0 };
+    tagMap[name].sec += (s.duration || 0);
+  });
+  const total = Object.values(tagMap).reduce((a, t) => a + t.sec, 0);
+  const sorted = Object.entries(tagMap).sort((a, b) => b[1].sec - a[1].sec);
+  container.innerHTML = sorted.map(([name, data]) => {
+    const pct = total > 0 ? Math.round((data.sec / total) * 100) : 0;
+    return `
+      <div class="review-tag-row">
+        <div class="review-tag-dot" style="background:${data.color}"></div>
+        <div class="review-tag-name">${name}</div>
+        <div class="review-tag-dur">${fmtSecs(data.sec)}</div>
+        <div class="review-tag-pct">${pct}%</div>
+      </div>`;
+  }).join('');
+}
+
+// ── Weekly Goals ──────────────────────────────────
+
+function getWeekStartKey(offset) {
+  return dateToKey(getWeekStart(offset));
+}
+
+function loadWeeklyGoals(weekStartKey) {
+  return JSON.parse(localStorage.getItem(`dos_wgoals_${weekStartKey}`) || '[]');
+}
+
+function saveWeeklyGoals(weekStartKey, goals) {
+  localStorage.setItem(`dos_wgoals_${weekStartKey}`, JSON.stringify(goals));
+}
+
+function renderWeeklyGoals() {
+  const wsk   = getWeekStartKey(weekOffset);
+  const goals = loadWeeklyGoals(wsk);
+  const isPast = weekOffset < 0;
+
+  const done = goals.filter(g => g.done).length;
+  document.getElementById('review-goals-pill').textContent = `${done} / ${goals.length}`;
+
+  const list = document.getElementById('review-goals-list');
+  list.innerHTML = goals.map(g => `
+    <div class="review-goal-item checklist-item ${g.done ? 'checked' : ''}" onclick="toggleWeeklyGoal('${wsk}','${g.id}')">
+      <div class="check-box">${g.done ? CHECK_SVG : ''}</div>
+      <div class="check-label">${escHtml(g.text)}</div>
+      ${!isPast ? `<button class="review-goal-delete" onclick="event.stopPropagation();deleteWeeklyGoal('${wsk}','${g.id}')">×</button>` : ''}
+    </div>`).join('');
+
+  // Show/hide add form
+  const addRow = document.getElementById('review-goal-add-row');
+  addRow.style.display = isPast ? 'none' : '';
+}
+
+function addWeeklyGoal() {
+  const input = document.getElementById('review-goal-input');
+  const text  = input.value.trim();
+  if (!text) return;
+  const wsk   = getWeekStartKey(weekOffset);
+  const goals = loadWeeklyGoals(wsk);
+  goals.push({ id: 'wg_' + Date.now(), text, done: false });
+  saveWeeklyGoals(wsk, goals);
+  input.value = '';
+  renderWeeklyGoals();
+}
+
+function toggleWeeklyGoal(wsk, goalId) {
+  const goals = loadWeeklyGoals(wsk);
+  const g = goals.find(x => x.id === goalId);
+  if (g) g.done = !g.done;
+  saveWeeklyGoals(wsk, goals);
+  renderWeeklyGoals();
+}
+
+function deleteWeeklyGoal(wsk, goalId) {
+  const goals = loadWeeklyGoals(wsk).filter(g => g.id !== goalId);
+  saveWeeklyGoals(wsk, goals);
+  renderWeeklyGoals();
+}
+
+// Bind Enter key to goal input
+document.addEventListener('DOMContentLoaded', () => {
+  const gi = document.getElementById('review-goal-input');
+  if (gi) gi.addEventListener('keydown', e => { if (e.key === 'Enter') addWeeklyGoal(); });
+});
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── renderAnalyticsSection ────────────────────────
+
+function renderAnalyticsSection() {
+  const all      = getAllSessions();
+  const todayKey = getTodayKey();
+
+  // B1: All-time stats
+  const allTimeSec   = all.reduce((a, s) => a + (s.duration || 0), 0);
+  const streakData   = JSON.parse(localStorage.getItem('dos_streak') || '{"count":0}');
+  const streak       = streakData.count || 0;
+  const totalSess    = all.length;
+
+  // Best week: group by Mon-start week key
+  const weekMap = {};
+  all.forEach(s => {
+    const d   = new Date(s.date);
+    const dow = (d.getDay() + 6) % 7;
+    const mon = new Date(d);
+    mon.setDate(d.getDate() - dow);
+    const wk  = dateToKey(mon);
+    weekMap[wk] = (weekMap[wk] || 0) + (s.duration || 0);
+  });
+  const bestWeekSec = Object.values(weekMap).length > 0 ? Math.max(...Object.values(weekMap)) : 0;
+
+  document.getElementById('review-alltime-metrics').innerHTML = `
+    <div class="metric-card">
+      <div class="metric-label">Total Focus</div>
+      <div class="metric-value">${fmtSecs(allTimeSec)}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Current Streak</div>
+      <div class="metric-value">${streak > 0 ? streak + ' 🔥' : '—'}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Best Week</div>
+      <div class="metric-value">${fmtSecs(bestWeekSec)}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Total Sessions</div>
+      <div class="metric-value">${totalSess > 0 ? totalSess : '—'}</div>
+    </div>
+  `;
+
+  // B4: Consistency
+  renderConsistency(all, todayKey);
+
+  // B2: Heatmap
+  renderHeatmap(all, todayKey);
+
+  // B3: Personal Records
+  renderPersonalRecords(all, weekMap);
+}
+
+// ── Consistency ───────────────────────────────────
+
+function renderConsistency(all, todayKey) {
+  const days30 = new Set();
+  for (let i = 0; i < 30; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days30.add(dateToKey(d));
+  }
+  const activeDays = new Set(all.filter(s => days30.has(s.date)).map(s => s.date)).size;
+  const score = Math.round((activeDays / 30) * 100);
+
+  document.getElementById('review-consistency-num').textContent = score;
+
+  let msg = '', msgColor = 'var(--text3)';
+  if (score >= 80)      { msg = 'Excellent. Keep this up.'; msgColor = 'var(--green)'; }
+  else if (score >= 50) { msg = 'Good progress. Push for consistency.'; msgColor = 'var(--yellow)'; }
+  else                  { msg = 'Build the habit. Show up daily.'; msgColor = 'var(--text3)'; }
+
+  const msgEl = document.getElementById('review-consistency-msg');
+  msgEl.textContent = msg;
+  msgEl.style.color = msgColor;
+
+  // SVG ring — circumference of r=24 is 2π×24 ≈ 150.796
+  const circumference = 150.796;
+  const offset = circumference - (score / 100) * circumference;
+  const fill = document.getElementById('review-ring-fill');
+  // Set immediately then transition
+  fill.style.strokeDashoffset = circumference;
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      fill.style.strokeDashoffset = offset;
+    });
+  });
+}
+
+// ── Heatmap ───────────────────────────────────────
+
+function renderHeatmap(all, todayKey) {
+  const container = document.getElementById('review-heatmap');
+  const cells = [];
+
+  // Build a map of dateKey → totalSec
+  const dayMap = {};
+  all.forEach(s => {
+    dayMap[s.date] = (dayMap[s.date] || 0) + (s.duration || 0);
+  });
+
+  // Last 30 days, oldest first
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key  = dateToKey(d);
+    const sec  = dayMap[key] || 0;
+    const mins = Math.floor(sec / 60);
+    const isToday = key === todayKey;
+
+    let bg;
+    if (mins === 0)        bg = 'var(--bg3)';
+    else if (mins < 30)    bg = 'rgba(168,168,188,0.15)';
+    else if (mins < 60)    bg = 'rgba(168,168,188,0.30)';
+    else if (mins < 120)   bg = 'rgba(168,168,188,0.55)';
+    else                   bg = 'rgba(168,168,188,0.85)';
+
+    const dayName  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+    const monthStr = REVIEW_MONTHS_SHORT[d.getMonth()];
+    const tip = mins === 0
+      ? `${dayName} ${d.getDate()} ${monthStr} — no focus`
+      : `${dayName} ${d.getDate()} ${monthStr} — ${fmtSecs(sec)}`;
+
+    cells.push(`<div class="review-heatmap-cell ${isToday ? 'today-cell' : ''}"
+      style="background:${bg}"
+      data-tip="${tip}"></div>`);
+  }
+
+  container.innerHTML = cells.join('');
+}
+
+// ── Personal Records ──────────────────────────────
+
+function renderPersonalRecords(all, weekMap) {
+  const container = document.getElementById('review-records-list');
+  if (all.length === 0) {
+    container.innerHTML = `<div class="review-empty-msg">Complete some sessions to see your records.</div>`;
+    return;
+  }
+
+  // Longest single session
+  const longest = all.reduce((best, s) => (s.duration || 0) > (best.duration || 0) ? s : best, all[0]);
+  const longestStr = `${longest.tag || 'Focus'} — ${fmtSecs(longest.duration)}`;
+
+  // Best day
+  const dayMapLocal = {};
+  all.forEach(s => { dayMapLocal[s.date] = (dayMapLocal[s.date] || 0) + (s.duration || 0); });
+  const bestDayKey = Object.keys(dayMapLocal).reduce((a, b) => dayMapLocal[a] > dayMapLocal[b] ? a : b);
+  const bestDayDate = new Date(bestDayKey + 'T00:00:00');
+  const bestDayStr = `${REVIEW_MONTHS_SHORT[bestDayDate.getMonth()]} ${bestDayDate.getDate()} — ${fmtSecs(dayMapLocal[bestDayKey])}`;
+
+  // Best week
+  let bestWeekKey = null;
+  if (Object.keys(weekMap).length > 0) {
+    bestWeekKey = Object.keys(weekMap).reduce((a, b) => weekMap[a] > weekMap[b] ? a : b);
+  }
+  let bestWeekStr = '—';
+  if (bestWeekKey) {
+    const wStart = new Date(bestWeekKey + 'T00:00:00');
+    const wEnd   = new Date(wStart);
+    wEnd.setDate(wStart.getDate() + 6);
+    bestWeekStr = `${REVIEW_MONTHS_SHORT[wStart.getMonth()]} ${wStart.getDate()}–${wEnd.getDate()} — ${fmtSecs(weekMap[bestWeekKey])}`;
+  }
+
+  // Longest streak
+  const streakRaw = localStorage.getItem('dos_longest_streak') || localStorage.getItem('dos_streak') || '0';
+  let longestStreak = 0;
+  try {
+    const parsed = JSON.parse(streakRaw);
+    longestStreak = typeof parsed === 'object' ? (parsed.count || 0) : parseInt(parsed) || 0;
+  } catch { longestStreak = parseInt(streakRaw) || 0; }
+
+  const records = [
+    { icon: '⏱', label: 'Longest Session', value: longestStr },
+    { icon: '📅', label: 'Best Day',         value: bestDayStr },
+    { icon: '📆', label: 'Best Week',        value: bestWeekStr },
+    { icon: '🔥', label: 'Longest Streak',   value: `${longestStreak} days` },
+    { icon: '🎯', label: 'Total Sessions',   value: `${all.length} sessions` },
+  ];
+
+  container.innerHTML = records.map(r => `
+    <div class="review-record-row">
+      <div class="review-record-icon">${r.icon}</div>
+      <div class="review-record-info">
+        <div class="review-record-label">${r.label}</div>
+      </div>
+      <div class="review-record-value">${r.value}</div>
+    </div>`).join('');
+}
+
+
+/* ══════════════════════════════════════════════════
+   STAGE 5 — SETTINGS PAGE
+══════════════════════════════════════════════════ */
+
+let _openEditorKey = null; // tracks which pillar/habit editor is open
+
+// ── initSettingsPage ──────────────────────────────
+function initSettingsPage() {
+  // Profile
+  const usernameInput = document.getElementById('settings-username');
+  if (usernameInput) {
+    usernameInput.value = localStorage.getItem('dos_username') || '';
+  }
+  const emailDisplay = document.getElementById('settings-account-email');
+  if (emailDisplay && currentUser?.email) {
+    emailDisplay.textContent = currentUser.email;
+  }
+
+  // Focus goal
+  const goalInput = document.getElementById('settings-focus-goal');
+  if (goalInput) {
+    goalInput.value = parseFloat(localStorage.getItem('dos_focus_goal_hrs') || '4');
+  }
+
+  // Default duration
+  const durSelect = document.getElementById('settings-default-duration');
+  if (durSelect) {
+    const saved = localStorage.getItem('dos_default_duration_mins') || '25';
+    durSelect.value = saved;
+  }
+
+  // Quote
+  const quoteInput = document.getElementById('settings-quote');
+  if (quoteInput) {
+    quoteInput.value = localStorage.getItem('dos_quote') || '';
+    quoteInput.placeholder = DEFAULT_QUOTE;
+  }
+}
+
+// ── settingSaveUsername ───────────────────────────
+function settingSaveUsername() {
+  const input = document.getElementById('settings-username');
+  const val   = (input?.value || '').trim();
+  if (val) localStorage.setItem('dos_username', val);
+  else     localStorage.removeItem('dos_username');
+
+  // Update greeting immediately
+  if (typeof renderGreeting === 'function') renderGreeting();
+
+  // Flash saved indicator
+  _settingFlashSaved('settings-username-saved');
+  syncPushSettings();
+}
+
+// ── settingSaveFocusGoal ──────────────────────────
+function settingSaveFocusGoal() {
+  const input = document.getElementById('settings-focus-goal');
+  const val   = parseFloat(input?.value);
+  if (!isNaN(val) && val > 0) {
+    localStorage.setItem('dos_focus_goal_hrs', String(val));
+    if (typeof renderFocusGoalBar === 'function') renderFocusGoalBar();
+    _settingFlashSaved('settings-goal-saved');
+    syncPushSettings();
+  }
+}
+
+// ── settingSaveDefaultDuration ────────────────────
+function settingSaveDefaultDuration() {
+  const select = document.getElementById('settings-default-duration');
+  const mins   = parseInt(select?.value || '25');
+  localStorage.setItem('dos_default_duration_mins', String(mins));
+  syncPushSettings();
+  // Update TIMER if idle
+  if (TIMER.state === 'idle' && TIMER.mode === 'timer') {
+    const secs = mins * 60;
+    TIMER.duration = secs;
+    TIMER.elapsed  = 0;
+    if (typeof focusUpdateDisplay === 'function') focusUpdateDisplay();
+    if (typeof focusUpdateRingArc  === 'function') focusUpdateRingArc(secs, secs);
+    // Sync chip selection
+    document.querySelectorAll('.focus-dur-chip').forEach(chip => {
+      chip.classList.toggle('active', parseInt(chip.dataset.dur) === secs);
+    });
+  }
+}
+
+// ── settingSaveQuote ──────────────────────────────
+function settingSaveQuote() {
+  const input = document.getElementById('settings-quote');
+  const val   = (input?.value || '').trim();
+  if (val) localStorage.setItem('dos_quote', val);
+  else     localStorage.removeItem('dos_quote');
+  if (typeof loadQuote === 'function') loadQuote();
+  _settingFlashSaved('settings-quote-saved');
+  syncPushDailyData(getTodayKey());
+}
+
+// ── settingExportCSV ──────────────────────────────
+function settingExportCSV() {
+  const sessions = JSON.parse(localStorage.getItem('dos_sessions') || '[]');
+  const header   = 'Date,Tag,Duration (minutes),Mode,Completed At\n';
+  const rows     = sessions.map(s => {
+    const date      = s.date || '';
+    const tag       = (s.tag  || '').replace(/,/g, ';');
+    const durMins   = s.duration ? Math.round(s.duration / 60) : 0;
+    const mode      = s.mode || '';
+    const completedAt = s.completedAt || '';
+    return `${date},${tag},${durMins},${mode},${completedAt}`;
+  }).join('\n');
+
+  const csv      = header + rows;
+  const blob     = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url      = URL.createObjectURL(blob);
+  const today    = getTodayKey();
+  const link     = document.createElement('a');
+  link.href      = url;
+  link.download  = `daily-os-sessions-${today}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('Sessions exported.', 'success');
+}
+
+// ── settingClearToday ─────────────────────────────
+function settingClearToday() {
+  const ctrl = document.getElementById('settings-clear-today-controls');
+  if (!ctrl) return;
+  // Show inline confirmation
+  ctrl.innerHTML = `
+    <span class="settings-confirm-text">Reset today's progress?</span>
+    <button class="settings-confirm-yes" onclick="_confirmClearToday()">Confirm</button>
+    <button class="settings-confirm-cancel" onclick="_cancelClearToday()">Cancel</button>
+  `;
+}
+function _confirmClearToday() {
+  const today = getTodayKey();
+  // Clear pillar checks
+  PILLARS.forEach(pillar => {
+    const items = getPillarItems(pillar.id);
+    items.forEach(item => {
+      localStorage.removeItem(`dos_pillar_${pillar.id}_${item.id}_${today}`);
+    });
+  });
+  // Clear habit checks
+  getHabitItems().forEach(h => {
+    localStorage.removeItem(`dos_habit_${h.id}_${today}`);
+  });
+  // Clear intention
+  localStorage.removeItem(`dos_intention_${today}`);
+  // Re-render
+  if (typeof initTodayPage === 'function') initTodayPage();
+  _cancelClearToday();
+  showToast("Today's data cleared.", 'info');
+}
+function _cancelClearToday() {
+  const ctrl = document.getElementById('settings-clear-today-controls');
+  if (ctrl) ctrl.innerHTML = `<button class="settings-btn-danger" onclick="settingClearToday()">Clear Today</button>`;
+}
+
+// ── settingClearSessions ──────────────────────────
+function settingClearSessions() {
+  const ctrl = document.getElementById('settings-clear-sessions-controls');
+  if (!ctrl) return;
+  ctrl.innerHTML = `
+    <span class="settings-confirm-text">Delete all sessions?</span>
+    <button class="settings-confirm-yes" onclick="_confirmClearSessions()">Confirm</button>
+    <button class="settings-confirm-cancel" onclick="_cancelClearSessions()">Cancel</button>
+  `;
+}
+function _confirmClearSessions() {
+  localStorage.removeItem('dos_sessions');
+  if (typeof renderFocusGoalBar    === 'function') renderFocusGoalBar();
+  if (typeof renderRecentSessions  === 'function') renderRecentSessions();
+  if (typeof renderMetrics         === 'function') renderMetrics();
+  if (typeof initReviewPage        === 'function') initReviewPage();
+  _cancelClearSessions();
+  showToast('All sessions deleted.', 'info');
+}
+function _cancelClearSessions() {
+  const ctrl = document.getElementById('settings-clear-sessions-controls');
+  if (ctrl) ctrl.innerHTML = `<button class="settings-btn-danger" onclick="settingClearSessions()">Clear Sessions</button>`;
+}
+
+// ── Pillar Editor ─────────────────────────────────
+function _pillarEditorStorageKey(pillarKey) {
+  if (pillarKey === 'habit') return 'dos_habit_items';
+  return `dos_pillar_${pillarKey}_items`;
+}
+
+function _pillarEditorDefaults(pillarKey) {
+  if (pillarKey === 'habit') return HABITS;
+  return PILLARS.find(p => p.id === pillarKey)?.items || [];
+}
+
+function _getPillarEditorItems(pillarKey) {
+  const lsKey = _pillarEditorStorageKey(pillarKey);
+  try {
+    const stored = localStorage.getItem(lsKey);
+    if (stored) return JSON.parse(stored);
+  } catch(e) {}
+  return _pillarEditorDefaults(pillarKey);
+}
+
+function _savePillarEditorItems(pillarKey, items) {
+  localStorage.setItem(_pillarEditorStorageKey(pillarKey), JSON.stringify(items));
+  // Update Today page
+  if (pillarKey === 'habit') {
+    if (typeof renderHabits === 'function') renderHabits();
+    if (typeof renderMetrics === 'function') renderMetrics();
+  } else {
+    if (typeof renderPillars === 'function') renderPillars();
+    if (typeof renderMetrics === 'function') renderMetrics();
+  }
+}
+
+function openPillarEditor(pillarKey) {
+  // Close any open editor
+  if (_openEditorKey && _openEditorKey !== pillarKey) {
+    closePillarEditor();
+  }
+  _openEditorKey = pillarKey;
+  _renderPillarEditorPanel(pillarKey);
+  document.getElementById(`pillar-editor-${pillarKey}`)?.classList.add('open');
+}
+
+function closePillarEditor() {
+  if (_openEditorKey) {
+    document.getElementById(`pillar-editor-${_openEditorKey}`)?.classList.remove('open');
+    _openEditorKey = null;
+  }
+}
+
+function _renderPillarEditorPanel(pillarKey) {
+  const panel = document.getElementById(`pillar-editor-${pillarKey}`);
+  if (!panel) return;
+  const items = _getPillarEditorItems(pillarKey);
+
+  const itemsHTML = items.map(item => `
+    <div class="pillar-editor-item" id="peditor-item-${pillarKey}-${item.id}">
+      <span class="pillar-editor-item-label">${escHtml(item.label)}</span>
+      <button class="pillar-editor-delete" onclick="deletePillarItem('${pillarKey}','${item.id}')" title="Remove">×</button>
+    </div>
+  `).join('');
+
+  panel.innerHTML = `
+    ${itemsHTML}
+    <div class="pillar-editor-add-row">
+      <input type="text" class="pillar-editor-add-input" id="peditor-add-input-${pillarKey}"
+             placeholder="New item…" maxlength="80"
+             onkeydown="if(event.key==='Enter'){addPillarItem('${pillarKey}')}" />
+      <button class="pillar-editor-add-btn" onclick="addPillarItem('${pillarKey}')">Add</button>
+    </div>
+    <div class="pillar-editor-done-row">
+      <button class="pillar-editor-done-btn" onclick="closePillarEditor()">Done</button>
+    </div>
+  `;
+}
+
+function addPillarItem(pillarKey) {
+  const input = document.getElementById(`peditor-add-input-${pillarKey}`);
+  const label = (input?.value || '').trim();
+  if (!label) return;
+  const items = _getPillarEditorItems(pillarKey);
+  const newId = 'custom_' + Date.now();
+  items.push({ id: newId, label });
+  _savePillarEditorItems(pillarKey, items);
+  syncPushSettings();
+  input.value = '';
+  _renderPillarEditorPanel(pillarKey); // re-render list
+}
+
+function deletePillarItem(pillarKey, itemId) {
+  const items   = _getPillarEditorItems(pillarKey);
+  const updated = items.filter(i => i.id !== itemId);
+  _savePillarEditorItems(pillarKey, updated);
+  syncPushSettings();
+  _renderPillarEditorPanel(pillarKey);
+}
+
+// ── Tag Manager ───────────────────────────────────
+let _tagManagerOpen = false;
+
+function openTagManager() {
+  if (_tagManagerOpen) {
+    closeTagManager();
+    return;
+  }
+  // Close pillar editors
+  closePillarEditor();
+  _tagManagerOpen = true;
+  _renderTagManagerPanel();
+  document.getElementById('tag-manager-panel')?.classList.add('open');
+}
+
+function closeTagManager() {
+  _tagManagerOpen = false;
+  document.getElementById('tag-manager-panel')?.classList.remove('open');
+}
+
+function _renderTagManagerPanel() {
+  const panel = document.getElementById('tag-manager-panel');
+  if (!panel) return;
+  const tags = getFocusTags();
+
+  const tagsHTML = tags.map(tag => `
+    <div class="tag-manager-item" id="tag-mgr-${tag.id}">
+      <div class="tag-manager-swatch" style="background:${escHtml(tag.color)}"></div>
+      <span class="tag-manager-name">${escHtml(tag.name)}</span>
+      <button class="tag-manager-delete" onclick="settingDeleteTag('${tag.id}')" title="Remove">×</button>
+    </div>
+  `).join('');
+
+  panel.innerHTML = `
+    ${tagsHTML}
+    <div class="tag-manager-add-row">
+      <input type="text" class="tag-manager-add-input" id="tag-mgr-name-input"
+             placeholder="Tag name" maxlength="24"
+             onkeydown="if(event.key==='Enter'){settingAddTag()}" />
+      <input type="color" class="tag-manager-color-input" id="tag-mgr-color-input" value="#a8a8bc" />
+      <button class="tag-manager-add-btn" onclick="settingAddTag()">Add</button>
+    </div>
+    <div class="tag-manager-done-row">
+      <button class="tag-manager-done-btn" onclick="closeTagManager()">Done</button>
+    </div>
+  `;
+}
+
+function settingAddTag() {
+  const nameInput  = document.getElementById('tag-mgr-name-input');
+  const colorInput = document.getElementById('tag-mgr-color-input');
+  const name  = (nameInput?.value || '').trim();
+  const color = colorInput?.value || '#a8a8bc';
+  if (!name) return;
+  const tags  = getFocusTags();
+  const newId = 'tag_' + Date.now();
+  tags.push({ id: newId, name, color });
+  saveFocusTags(tags);
+  syncPushSettings();
+  if (typeof renderFocusTags === 'function') renderFocusTags();
+  _renderTagManagerPanel();
+}
+
+function settingDeleteTag(tagId) {
+  const tags    = getFocusTags();
+  const updated = tags.filter(t => t.id !== tagId);
+  saveFocusTags(updated);
+  syncPushSettings();
+  if (typeof renderFocusTags === 'function') renderFocusTags();
+  _renderTagManagerPanel();
+}
+
+// ── Helper: flash saved indicator ─────────────────
+function _settingFlashSaved(indicatorId) {
+  const el = document.getElementById(indicatorId);
+  if (!el) return;
+  el.classList.add('visible');
+  setTimeout(() => el.classList.remove('visible'), 2000);
+}
+
+/* ══════════════════════════════════════════════════
+   STAGE 7 — CLOUD SYNC (Supabase)
+══════════════════════════════════════════════════ */
+
+// ── Error reset timer handle ──────────────────────
+let _syncErrorResetTimer = null;
+
+function _setSyncError() {
+  setSyncState('error');
+  clearTimeout(_syncErrorResetTimer);
+  _syncErrorResetTimer = setTimeout(() => setSyncState('synced'), 4000);
+}
+
+/* ─────────────────────────────────────────────────
+   syncPullOnLogin
+   Called once after login. Pulls all 3 tables and
+   rebuilds localStorage, then re-renders the UI.
+───────────────────────────────────────────────── */
+async function syncPullOnLogin() {
+  if (!currentUser) return;
+  setSyncState('syncing');
+
+  try {
+    // ── 1. Pull Settings ──────────────────────────
+    const { data: settingsRows, error: settingsErr } = await supa
+      .from('dos_settings')
+      .select('data')
+      .eq('user_id', currentUser.id)
+      .single();
+
+    if (!settingsErr && settingsRows?.data) {
+      const d = settingsRows.data;
+      if (d.username            != null) localStorage.setItem('dos_username',               d.username);
+      if (d.focus_goal_hrs      != null) localStorage.setItem('dos_focus_goal_hrs',          String(d.focus_goal_hrs));
+      if (d.default_duration_mins != null) localStorage.setItem('dos_default_duration_mins', String(d.default_duration_mins));
+      if (d.tags                != null) localStorage.setItem('dos_tags',                   JSON.stringify(d.tags));
+      if (d.pillar_career_items != null) localStorage.setItem('dos_pillar_career_items',    JSON.stringify(d.pillar_career_items));
+      if (d.pillar_physical_items != null) localStorage.setItem('dos_pillar_physical_items', JSON.stringify(d.pillar_physical_items));
+      if (d.pillar_spiritual_items != null) localStorage.setItem('dos_pillar_spiritual_items', JSON.stringify(d.pillar_spiritual_items));
+      if (d.habit_items         != null) localStorage.setItem('dos_habit_items',             JSON.stringify(d.habit_items));
+      if (d.pomo_settings       != null) localStorage.setItem('dos_pomo_settings',           JSON.stringify(d.pomo_settings));
+      if (d.streak              != null) localStorage.setItem('dos_streak',                  JSON.stringify(d.streak));
+    }
+
+    // ── 2. Pull Sessions ──────────────────────────
+    const { data: sessionRows, error: sessionsErr } = await supa
+      .from('dos_sessions')
+      .select('*')
+      .eq('user_id', currentUser.id);
+
+    if (!sessionsErr && sessionRows) {
+      const mapped = sessionRows.map(row => ({
+        id:          row.id,
+        date:        row.date,
+        tag:         row.tag,
+        tagColor:    row.tag_color,
+        duration:    row.duration,
+        completedAt: row.completed_at,
+        completed:   row.completed,
+        mode:        row.mode
+      }));
+      localStorage.setItem('dos_sessions', JSON.stringify(mapped));
+    }
+
+    // ── 3. Pull Daily Data ────────────────────────
+    const { data: dailyRows, error: dailyErr } = await supa
+      .from('dos_daily')
+      .select('date, data')
+      .eq('user_id', currentUser.id);
+
+    if (!dailyErr && dailyRows) {
+      dailyRows.forEach(row => {
+        const date = row.date;
+        const d    = row.data;
+        if (!d) return;
+
+        // Pillar checks
+        ['career', 'physical', 'spiritual'].forEach(pillar => {
+          const pillarKey = `pillar_${pillar}`;
+          if (d[pillarKey] && typeof d[pillarKey] === 'object') {
+            Object.entries(d[pillarKey]).forEach(([itemId, val]) => {
+              localStorage.setItem(`dos_pillar_${pillar}_${itemId}_${date}`, String(val));
+            });
+          }
+        });
+
+        // Habit checks
+        if (d.habits && typeof d.habits === 'object') {
+          Object.entries(d.habits).forEach(([habitId, val]) => {
+            localStorage.setItem(`dos_habit_${habitId}_${date}`, String(val));
+          });
+        }
+
+        // Intention
+        if (d.intention != null) localStorage.setItem(`dos_intention_${date}`, d.intention);
+
+        // Notes
+        ['career', 'physical', 'spiritual'].forEach(pillar => {
+          const noteKey = `notes_${pillar}`;
+          if (d[noteKey] != null) localStorage.setItem(`dos_notes_${pillar}_${date}`, d[noteKey]);
+        });
+
+        // Quote — only write if non-empty
+        if (d.quote) localStorage.setItem('dos_quote', d.quote);
+      });
+    }
+
+    setSyncState('synced');
+
+    // Re-render all UI with synced data
+    if (typeof initTodayPage       === 'function') initTodayPage();
+    if (typeof initSettingsPage    === 'function') initSettingsPage();
+    if (typeof renderFocusGoalBar  === 'function') renderFocusGoalBar();
+    if (typeof renderRecentSessions === 'function') renderRecentSessions();
+    if (typeof renderFocusTags     === 'function') renderFocusTags();
+
+  } catch (err) {
+    console.error('[DailyOS] syncPullOnLogin failed:', err);
+    _setSyncError();
+    showToast('Sync failed. Working offline.', 'error');
+  }
+}
+
+/* ─────────────────────────────────────────────────
+   syncPushSession
+   Upserts a single session object to dos_sessions.
+───────────────────────────────────────────────── */
+async function syncPushSession(session) {
+  if (!currentUser) return;
+  setSyncState('syncing');
+  try {
+    const { error } = await supa.from('dos_sessions').upsert({
+      id:           session.id,
+      user_id:      currentUser.id,
+      date:         session.date,
+      tag:          session.tag,
+      tag_color:    session.tagColor,
+      duration:     session.duration,
+      completed_at: session.completedAt,
+      completed:    session.completed,
+      mode:         session.mode
+    }, { onConflict: 'id' });
+    if (error) throw error;
+    setSyncState('synced');
+  } catch (err) {
+    console.error('[DailyOS] syncPushSession failed:', err);
+    _setSyncError();
+  }
+}
+
+/* ─────────────────────────────────────────────────
+   syncPushDailyData
+   Reads all daily localStorage keys for a given date
+   and upserts the full blob to dos_daily.
+───────────────────────────────────────────────── */
+async function syncPushDailyData(date) {
+  if (!currentUser) return;
+  try {
+    // Build pillar check objects
+    const pillarCareer   = {};
+    const pillarPhysical = {};
+    const pillarSpiritual = {};
+
+    getPillarItems('career').forEach(item => {
+      pillarCareer[item.id] = localStorage.getItem(`dos_pillar_career_${item.id}_${date}`) === 'true';
+    });
+    getPillarItems('physical').forEach(item => {
+      pillarPhysical[item.id] = localStorage.getItem(`dos_pillar_physical_${item.id}_${date}`) === 'true';
+    });
+    getPillarItems('spiritual').forEach(item => {
+      pillarSpiritual[item.id] = localStorage.getItem(`dos_pillar_spiritual_${item.id}_${date}`) === 'true';
+    });
+
+    // Build habit checks object
+    const habits = {};
+    getHabitItems().forEach(h => {
+      habits[h.id] = localStorage.getItem(`dos_habit_${h.id}_${date}`) === 'true';
+    });
+
+    const dailyData = {
+      pillar_career:    pillarCareer,
+      pillar_physical:  pillarPhysical,
+      pillar_spiritual: pillarSpiritual,
+      habits,
+      intention:        localStorage.getItem(`dos_intention_${date}`) || '',
+      notes_career:     localStorage.getItem(`dos_notes_career_${date}`) || '',
+      notes_physical:   localStorage.getItem(`dos_notes_physical_${date}`) || '',
+      notes_spiritual:  localStorage.getItem(`dos_notes_spiritual_${date}`) || '',
+      quote:            localStorage.getItem('dos_quote') || ''
+    };
+
+    const { error } = await supa.from('dos_daily').upsert({
+      id:         `${currentUser.id}_${date}`,
+      user_id:    currentUser.id,
+      date:       date,
+      data:       dailyData,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id,date' });
+
+    if (error) throw error;
+  } catch (err) {
+    console.error('[DailyOS] syncPushDailyData failed:', err);
+    // Silent — offline-tolerant. Data is safe in localStorage.
+  }
+}
+
+/* ─────────────────────────────────────────────────
+   syncPushSettings
+   Reads all settings localStorage keys and upserts
+   the full blob to dos_settings.
+───────────────────────────────────────────────── */
+async function syncPushSettings() {
+  if (!currentUser) return;
+  try {
+    const settingsData = {
+      username:               localStorage.getItem('dos_username') || '',
+      focus_goal_hrs:         parseFloat(localStorage.getItem('dos_focus_goal_hrs')) || 4,
+      default_duration_mins:  parseInt(localStorage.getItem('dos_default_duration_mins')) || 25,
+      tags:                   JSON.parse(localStorage.getItem('dos_tags') || 'null') || DEFAULT_TAGS,
+      pillar_career_items:    JSON.parse(localStorage.getItem('dos_pillar_career_items')   || 'null') || PILLARS.find(p => p.id === 'career')?.items   || [],
+      pillar_physical_items:  JSON.parse(localStorage.getItem('dos_pillar_physical_items') || 'null') || PILLARS.find(p => p.id === 'physical')?.items || [],
+      pillar_spiritual_items: JSON.parse(localStorage.getItem('dos_pillar_spiritual_items')|| 'null') || PILLARS.find(p => p.id === 'spiritual')?.items|| [],
+      habit_items:            JSON.parse(localStorage.getItem('dos_habit_items')           || 'null') || HABITS,
+      pomo_settings:          JSON.parse(localStorage.getItem('dos_pomo_settings')         || 'null') || TIMER.pomoSettings,
+      streak:                 JSON.parse(localStorage.getItem('dos_streak')                || '{"count":0}')
+    };
+
+    const { error } = await supa.from('dos_settings').upsert({
+      user_id:    currentUser.id,
+      data:       settingsData,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+
+    if (error) throw error;
+  } catch (err) {
+    console.error('[DailyOS] syncPushSettings failed:', err);
+    // Silent — offline-tolerant.
+  }
+}
+```
+
+  </script>
+</body>
+</html>
