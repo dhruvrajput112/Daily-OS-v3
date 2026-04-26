@@ -70,9 +70,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 4. CDN scripts (Supabase JS library) — cache first
+  // 4. CDN scripts — network first so SDK is always fresh
   if (url.hostname === 'cdn.jsdelivr.net') {
-    event.respondWith(cacheFirstWithNetwork(event.request));
+    event.respondWith(networkFirstWithCache(event.request));
     return;
   }
 
