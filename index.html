@@ -15,10 +15,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet" />
 
-  <!-- Supabase CDN -->
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
     /* ─────────────────────────────────────────
        DESIGN TOKENS
@@ -2381,7 +2377,7 @@
     // ── SUPABASE ──────────────────────────────────────
     const SUPABASE_URL = 'https://hzfxrwmzmwvleblmfpqv.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Znhyd216bXd2bGVibG1mcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMzYyNTIsImV4cCI6MjA5MjcxMjI1Mn0.p9sxIc9W6rlCTbFm5N-PJTWE8wYj6CQbJiicOjm9gcY';
-    const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let supa = null;
 
     // ── STATE ─────────────────────────────────────────
     let currentUser     = null;
@@ -2399,20 +2395,52 @@
     const syncLabel      = document.getElementById('sync-label');
     const toastContainer = document.getElementById('toast-container');
 
-    // ── AUTH STATE LISTENER ───────────────────────────
-    supa.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        currentUser = session.user;
-        hideLoadingScreen();
-        showApp();
-        initApp();
-      } else {
-        currentUser = null;
-        hideLoadingScreen();
-        hideApp();
-        showAuthScreen();
+    // ── BOOT ──────────────────────────────────────────
+    // Called by the Supabase script's onload. If CDN fails,
+    // the onerror handler calls bootFailed() instead.
+    let _authFired = false;
+
+    function bootSupabase() {
+      try {
+        supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      } catch(e) {
+        console.error('[DailyOS] supabase.createClient failed:', e);
+        bootFailed();
+        return;
       }
-    });
+
+      // Fallback: if onAuthStateChange never fires within 6 s, show auth screen
+      const fallbackTimer = setTimeout(() => {
+        if (!_authFired) {
+          console.warn('[DailyOS] auth timeout — showing auth screen');
+          hideLoadingScreen();
+          showAuthScreen();
+        }
+      }, 6000);
+
+      supa.auth.onAuthStateChange((event, session) => {
+        _authFired = true;
+        clearTimeout(fallbackTimer);
+        if (session?.user) {
+          currentUser = session.user;
+          hideLoadingScreen();
+          showApp();
+          initApp();
+        } else {
+          currentUser = null;
+          hideLoadingScreen();
+          hideApp();
+          showAuthScreen();
+        }
+      });
+    }
+
+    function bootFailed() {
+      // Supabase CDN failed — show auth screen in offline/degraded mode
+      console.error('[DailyOS] Supabase unavailable. Running in offline mode.');
+      hideLoadingScreen();
+      showAuthScreen();
+    }
 
     // ── SCREEN TRANSITIONS ────────────────────────────
     function hideLoadingScreen() { loadingScreen.classList.add('hidden'); }
@@ -2443,6 +2471,7 @@
     // ── AUTH HANDLER ──────────────────────────────────
     async function handleAuth() {
       clearAuthError();
+      if (!supa) { showAuthError('Connection unavailable. Please reload the page.'); return; }
       const email    = document.getElementById('auth-email').value.trim();
       const password = document.getElementById('auth-password').value;
       const name     = document.getElementById('auth-name').value.trim();
@@ -2474,6 +2503,7 @@
 
     // ── LOGOUT ────────────────────────────────────────
     async function handleLogout() {
+      if (!supa) return;
       setSyncState('syncing');
       await supa.auth.signOut();
       setSyncState('synced');
@@ -4668,5 +4698,38 @@ async function syncPushSettings() {
 ```
 
   </script>
+
+  <!--
+    Supabase CDN loaded LAST — after ALL app code is parsed and ready.
+    onload calls bootSupabase() which wires the auth listener.
+    onerror falls back to unpkg, then calls bootFailed() if both fail.
+  -->
+
+  <script>
+    (function() {
+      var primary  = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+      var fallback = 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+      var done     = false;
+
+      function inject(src, ok, fail) {
+        var s    = document.createElement('script');
+        s.src    = src;
+        s.onload = ok;
+        s.onerror = fail;
+        document.body.appendChild(s);
+      }
+
+      inject(primary,
+        function() { if (!done) { done = true; bootSupabase(); } },
+        function() {
+          inject(fallback,
+            function() { if (!done) { done = true; bootSupabase(); } },
+            function() { if (!done) { done = true; bootFailed(); } }
+          );
+        }
+      );
+    })();
+  </script>
+
 </body>
 </html>
