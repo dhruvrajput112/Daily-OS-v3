@@ -2397,20 +2397,26 @@
     const syncLabel      = document.getElementById('sync-label');
     const toastContainer = document.getElementById('toast-container');
 
-    // ── AUTH STATE LISTENER ───────────────────────────
-    supa.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        currentUser = session.user;
-        hideLoadingScreen();
-        showApp();
-        initApp();
-      } else {
-        currentUser = null;
-        hideLoadingScreen();
-        hideApp();
-        showAuthScreen();
-      }
-    });
+    // Fallback: if auth state never fires, show auth screen anyway
+const authFallback = setTimeout(() => {
+  hideLoadingScreen();
+  showAuthScreen();
+}, 4000);
+
+supa.auth.onAuthStateChange((event, session) => {
+  clearTimeout(authFallback);
+  if (session?.user) {
+    currentUser = session.user;
+    hideLoadingScreen();
+    showApp();
+    initApp();
+  } else {
+    currentUser = null;
+    hideLoadingScreen();
+    hideApp();
+    showAuthScreen();
+  }
+});
 
     // ── SCREEN TRANSITIONS ────────────────────────────
     function hideLoadingScreen() { loadingScreen.classList.add('hidden'); }
