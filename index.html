@@ -21,9 +21,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet" />
 
-  <!-- Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
-
   <style>
     /* ─────────────────────────────────────────
        DESIGN TOKENS
@@ -2371,7 +2368,9 @@
 
   <div id="toast-container"></div>
 
-  <script>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
     /* ══════════════════════════════════════════════════
        STAGE 1 — CORE INFRASTRUCTURE
     ══════════════════════════════════════════════════ */
@@ -2379,13 +2378,7 @@
     // ── SUPABASE ──────────────────────────────────────
     const SUPABASE_URL = 'https://hzfxrwmzmwvleblmfpqv.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Znhyd216bXd2bGVibG1mcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMzYyNTIsImV4cCI6MjA5MjcxMjI1Mn0.p9sxIc9W6rlCTbFm5N-PJTWE8wYj6CQbJiicOjm9gcY';
-    if (typeof supabase === 'undefined') {
-  document.getElementById('loading-screen').classList.add('hidden');
-  document.getElementById('auth-screen').classList.remove('hidden');
-  document.getElementById('auth-error').textContent = 'Failed to load. Please refresh.';
-  throw new Error('Supabase SDK failed to load');
-}
-const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supa = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // ── STATE ─────────────────────────────────────────
     let currentUser     = null;
@@ -2403,26 +2396,20 @@ const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const syncLabel      = document.getElementById('sync-label');
     const toastContainer = document.getElementById('toast-container');
 
-    // Fallback: if auth state never fires, show auth screen anyway
-const authFallback = setTimeout(() => {
-  hideLoadingScreen();
-  showAuthScreen();
-}, 4000);
-
-supa.auth.onAuthStateChange((event, session) => {
-  clearTimeout(authFallback);
-  if (session?.user) {
-    currentUser = session.user;
-    hideLoadingScreen();
-    showApp();
-    initApp();
-  } else {
-    currentUser = null;
-    hideLoadingScreen();
-    hideApp();
-    showAuthScreen();
-  }
-});
+    // ── AUTH STATE LISTENER ───────────────────────────
+    supa.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        currentUser = session.user;
+        hideLoadingScreen();
+        showApp();
+        initApp();
+      } else {
+        currentUser = null;
+        hideLoadingScreen();
+        hideApp();
+        showAuthScreen();
+      }
+    });
 
     // ── SCREEN TRANSITIONS ────────────────────────────
     function hideLoadingScreen() { loadingScreen.classList.add('hidden'); }
@@ -4647,6 +4634,35 @@ supa.auth.onAuthStateChange((event, session) => {
         console.warn('[Daily OS] syncPushSettings error:', err);
       }
     }
+
+    // ── EXPOSE FUNCTIONS TO WINDOW (required for type="module") ──
+    // type="module" scripts are scoped — inline onclick handlers need
+    // functions on window to find them.
+    Object.assign(window, {
+      // Auth
+      setAuthMode, handleAuth, handleLogout,
+      // Navigation
+      showPage,
+      // Today page
+      togglePillarItem, savePillarNotes, toggleHabit,
+      handleQuoteClick,
+      // Focus page
+      focusSwitchMode, focusSetDuration, focusSetCustomDuration,
+      focusSelectTag: (tag) => focusSelectTag(tag),
+      focusToggleAddTag, focusAddTag, focusStart, focusPause,
+      focusResume, focusStopAndSave, focusAbandonRequest,
+      focusHideAbandonBanner, focusConfirmAbandon,
+      focusTogglePomoSettings, focusSavePomoSettings,
+      // Review page
+      switchReviewTab, shiftWeek, addWeeklyGoal, toggleWeeklyGoal,
+      // Settings page
+      settingSaveUsername, settingSaveFocusGoal, settingSaveDefaultDuration,
+      settingSaveQuote, settingExportCSV, settingClearToday, settingClearSessions,
+      _confirmClearToday, _cancelClearToday,
+      _confirmClearSessions, _cancelClearSessions,
+      openPillarEditor, closePillarEditor, addPillarItem, deletePillarItem,
+      openTagManager, closeTagManager, settingAddTag, settingDeleteTag,
+    });
 
     // ── SERVICE WORKER REGISTRATION ───────────────────
     if ('serviceWorker' in navigator) {
