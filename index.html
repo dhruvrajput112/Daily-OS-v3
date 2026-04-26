@@ -3,10 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Daily OS — Your Personal Discipline OS</title>
-  <meta name="description" content="Daily OS — Track your focus, habits, and discipline across career, physical, and spiritual pillars." />
-  <meta name="theme-color" content="#080808" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔱</text></svg>" />
+  <title>Daily OS</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1647,151 +1644,6 @@
       .tag-manager-panel { margin: 0 16px 4px; }
     }
 
-    /* ═══════════════════════════════════════════
-       STAGE 6 — FINAL POLISH
-    ═══════════════════════════════════════════ */
-
-    /* ── FP7: Selection color ── */
-    ::selection { background: rgba(168,168,188,0.2); color: var(--text); }
-
-    /* ── FP8: Custom scrollbars ── */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--bg5); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--text4); }
-
-    /* ── FP6: Prevent double-tap zoom, FP9: No horizontal overflow ── */
-    body { overflow-x: hidden; }
-    button { touch-action: manipulation; }
-
-    /* ── FP5: Input autocomplete hygiene already in HTML; tap highlight ── */
-    .settings-input { -webkit-tap-highlight-color: transparent; }
-
-    /* ── Today P1: Hero spacing ── */
-    .today-hero { margin-bottom: 0; padding-bottom: 36px; }
-
-    /* ── Today P2: Metrics row bottom margin ── */
-    .today-metrics { margin-bottom: 36px; }
-
-    /* ── Today P4: Intention label color ── */
-    .today-intention-label { color: var(--text3); }
-
-    /* ── Today P5: Quote section bottom padding ── */
-    .today-quote-wrap { padding-bottom: 24px; }
-
-    /* ── Today P3: Last pillar card spacing (via JS-rendered cards) ── */
-    #today-pillars .pillar-card:last-child { margin-bottom: 24px; }
-
-    /* ── MI1: Page heading fade-in animation ── */
-    @keyframes page-heading-in {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .page.active .page-heading,
-    .page.active .page-tagline,
-    .page.active .today-greeting,
-    .page.active .today-date-line {
-      animation: page-heading-in 0.2s ease both;
-    }
-    .page.active .page-tagline  { animation-delay: 0.04s; }
-    .page.active .today-greeting { animation-delay: 0.04s; }
-
-    /* ── MI2: Metric card hover lift ── */
-    .metric-card {
-      transition: border-color 0.2s ease, transform 0.2s ease;
-    }
-    .metric-card:hover {
-      border-color: var(--border2);
-      transform: translateY(-1px);
-    }
-
-    /* ── MI3: Checklist item check animation ── */
-    @keyframes check-pop {
-      0%   { transform: scale(1); }
-      50%  { transform: scale(0.9); }
-      100% { transform: scale(1); }
-    }
-    .checklist-item.checked .check-box {
-      animation: check-pop 0.2s ease;
-    }
-
-    /* ── MI4: Button press state ── */
-    .settings-btn:active,
-    .settings-btn-danger:active,
-    .focus-btn-primary:active,
-    .focus-btn-secondary:active,
-    .focus-btn-danger:active { transform: scale(0.98); }
-
-    /* ── MI6: Nav tab active indicator transition (already present; reinforce) ── */
-    .nav-tab { transition: color 0.2s ease, border-bottom-color 0.2s ease; }
-
-    /* ── Focus P1: Ring wrap centering ── */
-    .focus-ring-wrap {
-      margin: 8px auto 32px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    /* ── Focus P2: Mode pill centering (already center; add explicit mb) ── */
-    .focus-mode-row {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 28px;
-    }
-
-    /* ── Focus P3: Tag row scroll ── */
-    .focus-tag-row {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    .focus-tag-row::-webkit-scrollbar { display: none; }
-
-    /* ── Focus P4: Duration row centering ── */
-    .focus-duration-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin-bottom: 28px;
-    }
-
-    /* ── Focus P5: Goal card margin ── */
-    .focus-goal-card { margin-top: 32px; }
-    @media (max-width: 640px) {
-      .focus-goal-card { margin-top: 24px; }
-    }
-
-    /* ── Focus P6: Session row last-child border ── */
-    .focus-session-row:last-child { border-bottom: none; }
-
-    /* ── Review P1: Tab switcher full width on mobile ── */
-    @media (max-width: 640px) {
-      .review-tab-switcher { display: flex; width: 100%; }
-      .review-tab { flex: 1; text-align: center; }
-      /* Review P2: Week nav space-between on mobile */
-      .review-week-nav { justify-content: space-between; }
-    }
-
-    /* ── Review P3: Heatmap overflow scroll ── */
-    .review-heatmap-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-
-    /* ── Review P4: Analytics section top spacing ── */
-    #review-analytics-section { padding-top: 4px; }
-
-    /* ── Settings P1: About card bottom margin ── */
-    .settings-card:last-child { margin-bottom: 40px; }
-
-    /* ── Settings P2: Input tap highlight ── */
-    @media (max-width: 640px) {
-      .settings-input { -webkit-tap-highlight-color: transparent; }
-    }
-
-    /* ── Settings P3: Pillar editor panel bottom margin when open ── */
-    .pillar-editor-panel.open { margin-bottom: 8px; }
-    .tag-manager-panel.open   { margin-bottom: 8px; }
-
   </style>
 </head>
 <body>
@@ -2090,9 +1942,7 @@
           <div class="pillar-card">
             <div class="pillar-header"><span class="pillar-name">Last 30 Days</span></div>
             <div class="pillar-divider"></div>
-            <div class="review-heatmap-wrap">
-              <div class="review-heatmap-grid" id="review-heatmap"></div>
-            </div>
+            <div class="review-heatmap-grid" id="review-heatmap"></div>
             <div class="review-heatmap-legend">
               <span class="review-legend-label">Less</span>
               <div class="review-legend-cell" style="background:var(--bg3)"></div>
@@ -2132,7 +1982,6 @@
             <div class="settings-row-right">
               <input type="text" class="settings-input" id="settings-username"
                      placeholder="Your name"
-                     autocomplete="off"
                      onblur="settingSaveUsername()"
                      onkeydown="if(event.key==='Enter'){this.blur()}" />
               <span class="settings-saved-indicator" id="settings-username-saved">Saved ✓</span>
@@ -2174,7 +2023,6 @@
             <div class="settings-row-right">
               <input type="number" class="settings-input settings-input-sm" id="settings-focus-goal"
                      min="1" max="16" step="0.5"
-                     autocomplete="off"
                      onblur="settingSaveFocusGoal()"
                      onkeydown="if(event.key==='Enter'){this.blur()}" />
               <span class="settings-unit-label">hours</span>
@@ -2251,7 +2099,6 @@
             <div class="settings-row-right">
               <input type="text" class="settings-input settings-input-lg" id="settings-quote"
                      placeholder="Enter your daily quote…"
-                     autocomplete="off"
                      onblur="settingSaveQuote()"
                      onkeydown="if(event.key==='Enter'){this.blur()}" />
               <span class="settings-saved-indicator" id="settings-quote-saved">Saved ✓</span>
@@ -2369,6 +2216,7 @@
     ══════════════════════════════════════════════════ */
 
     // ── SUPABASE ──────────────────────────────────────
+    // ← FILL IN YOUR SUPABASE CREDENTIALS HERE
     const SUPABASE_URL = 'https://hzfxrwmzmwvleblmfpqv.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Znhyd216bXd2bGVibG1mcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMzYyNTIsImV4cCI6MjA5MjcxMjI1Mn0.p9sxIc9W6rlCTbFm5N-PJTWE8wYj6CQbJiicOjm9gcY';
     const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -2477,6 +2325,7 @@
       showPage('today');
       initTodayPage(); // Stage 2
       initFocusPage(); // Stage 3
+      initReviewPage(); // Stage 4
       initSettingsPage(); // Stage 5
     }
 
@@ -2487,7 +2336,6 @@
       if (target) target.classList.add('active');
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.page === pageId));
       document.querySelectorAll('.nav-mobile-tab').forEach(t => t.classList.toggle('active', t.dataset.page === pageId));
-      window.scrollTo({ top: 0, behavior: 'smooth' });
       if (pageId === 'review') initReviewPage();
     }
 
@@ -2636,10 +2484,10 @@
       const key   = `dos_intention_${getTodayKey()}`;
       const input = document.getElementById('today-intention');
       input.value = localStorage.getItem(key) || '';
-      input.oninput = () => {
+      input.addEventListener('input', () => {
         localStorage.setItem(key, input.value);
         flashSaved();
-      };
+      });
     }
 
     function flashSaved() {
@@ -2834,7 +2682,7 @@
 
       const badge = document.getElementById(`pillar-badge-${pillarId}`);
       if (badge) {
-        badge.textContent = allDone ? 'WIN ✓' : `${checkedCount}/${items.length}`;
+        badge.textContent = allDone ? 'WIN ✓' : `${checkedCount}/${pillar.items.length}`;
         badge.className   = allDone ? 'pillar-badge win' : 'pillar-badge';
       }
       const card = document.getElementById(`pillar-card-${pillarId}`);
@@ -3688,9 +3536,8 @@
         const k = dateToKey(d);
         return weekSessions.filter(s => s.date === k).reduce((a, s) => a + (s.duration || 0), 0);
       });
-      const maxDaySec  = Math.max(...dayTotals);
-      const maxDayIdx  = maxDaySec > 0 ? dayTotals.indexOf(maxDaySec) : -1;
-      const bestDay    = maxDayIdx >= 0 ? REVIEW_DAYS_FULL[maxDayIdx] : '—';
+      const maxDayIdx  = dayTotals.indexOf(Math.max(...dayTotals));
+      const bestDay    = totalSec > 0 ? REVIEW_DAYS_FULL[maxDayIdx] : '—';
       const avgSec     = Math.round(totalSec / 7);
 
       document.getElementById('review-weekly-metrics').innerHTML = `
@@ -3848,8 +3695,7 @@
 
       // B1: All-time stats
       const allTimeSec   = all.reduce((a, s) => a + (s.duration || 0), 0);
-      const streakData   = JSON.parse(localStorage.getItem('dos_streak') || '{"count":0}');
-      const streak       = streakData.count || 0;
+      const streak       = parseInt(localStorage.getItem('dos_streak') || '0');
       const totalSess    = all.length;
 
       // Best week: group by Mon-start week key
@@ -3871,7 +3717,7 @@
         </div>
         <div class="metric-card">
           <div class="metric-label">Current Streak</div>
-          <div class="metric-value">${streak > 0 ? streak + ' 🔥' : '—'}</div>
+          <div class="metric-value">${streak} 🔥</div>
         </div>
         <div class="metric-card">
           <div class="metric-label">Best Week</div>
@@ -3879,7 +3725,7 @@
         </div>
         <div class="metric-card">
           <div class="metric-label">Total Sessions</div>
-          <div class="metric-value">${totalSess > 0 ? totalSess : '—'}</div>
+          <div class="metric-value">${totalSess}</div>
         </div>
       `;
 
@@ -4005,12 +3851,7 @@
       }
 
       // Longest streak
-      const streakRaw = localStorage.getItem('dos_longest_streak') || localStorage.getItem('dos_streak') || '0';
-      let longestStreak = 0;
-      try {
-        const parsed = JSON.parse(streakRaw);
-        longestStreak = typeof parsed === 'object' ? (parsed.count || 0) : parseInt(parsed) || 0;
-      } catch { longestStreak = parseInt(streakRaw) || 0; }
+      const longestStreak = parseInt(localStorage.getItem('dos_longest_streak') || localStorage.getItem('dos_streak') || '0');
 
       const records = [
         { icon: '⏱', label: 'Longest Session', value: longestStr },
