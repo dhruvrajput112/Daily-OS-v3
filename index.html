@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Daily OS</title>
+  <title>Daily OS — Your Personal Discipline OS</title>
+  <meta name="description" content="Daily OS — Track your focus, habits, and discipline across career, physical, and spiritual pillars." />
+  <meta name="theme-color" content="#080808" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔱</text></svg>" />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1644,6 +1647,132 @@
       .tag-manager-panel { margin: 0 16px 4px; }
     }
 
+    /* ═══════════════════════════════════════════
+       STAGE 6 — POLISH & NEW FEATURES
+    ═══════════════════════════════════════════ */
+
+    /* ── Selection ── */
+    ::selection { background: rgba(168,168,188,0.2); color: var(--text); }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bg5); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text4); }
+
+    /* ── Touch & overflow ── */
+    button { touch-action: manipulation; }
+    body { overflow-x: hidden; }
+
+    /* ── Metric card hover lift ── */
+    .metric-card {
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+    .metric-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+
+    /* ── Check animation ── */
+    @keyframes check-pop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(0.88); }
+      100% { transform: scale(1); }
+    }
+    .checklist-item.checked .check-box { animation: check-pop 0.18s ease; }
+
+    /* ── Button press ── */
+    .focus-btn-primary:active,
+    .focus-btn-secondary:active,
+    .focus-btn-danger:active,
+    .settings-btn:active,
+    .settings-btn-danger:active { transform: scale(0.97); }
+
+    /* ── Today hero bottom margin ── */
+    .today-hero { margin-bottom: 28px; }
+
+    /* ── Quote bottom padding ── */
+    .today-quote-wrap { padding: 32px 0 32px; }
+
+    /* ── Session row last child ── */
+    .focus-session-row:last-child { border-bottom: none; }
+
+    /* ── Mobile review tab ── */
+    @media (max-width: 640px) {
+      .review-tab-switcher { width: 100%; display: flex; }
+    }
+
+    /* ── Insight Card ── */
+    .today-insight-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .today-insight-icon { font-size: 18px; flex-shrink: 0; }
+    .today-insight-text { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+    /* ── Subject / Intent selectors (B1) ── */
+    .focus-subject-label,
+    .focus-intent-label {
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 8px;
+    }
+    .focus-subject-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .focus-subject-chip {
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .focus-subject-chip:hover { background: var(--bg4); color: var(--text); }
+    .focus-subject-chip.active {
+      background: var(--accent-glow);
+      border-color: var(--accent-dim);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .focus-subject-wrap { margin-bottom: 16px; }
+    .focus-intent-wrap { margin-bottom: 20px; }
+    .focus-intent-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border2);
+      border-radius: 0;
+      padding: 10px 0;
+      font-size: 14px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      width: 100%;
+      outline: none;
+      transition: border-bottom-color 0.2s ease;
+    }
+    .focus-intent-input::placeholder { color: var(--text3); }
+    .focus-intent-input:focus { border-bottom-color: var(--accent-dim); }
+
+    /* ── Session intent in recent list ── */
+    .focus-session-intent {
+      font-size: 11px;
+      color: var(--text3);
+      font-style: italic;
+      margin-top: 1px;
+    }
+
   </style>
 </head>
 <body>
@@ -1738,6 +1867,12 @@
         <!-- SECTION 2: METRICS ROW -->
         <div class="today-metrics" id="today-metrics"></div>
 
+        <!-- SECTION 2.5: INSIGHT CARD -->
+        <div class="today-insight-card" id="today-insight-card">
+          <span class="today-insight-icon" id="today-insight-icon">🔱</span>
+          <span class="today-insight-text" id="today-insight-text">Jai Bholenath. Give your best today.</span>
+        </div>
+
         <!-- SECTION 3: THREE PILLARS -->
         <div id="today-pillars"></div>
 
@@ -1769,6 +1904,27 @@
             <button class="focus-mode-btn"        data-mode="stopwatch" onclick="focusSwitchMode('stopwatch')">Stopwatch</button>
             <button class="focus-mode-btn"        data-mode="pomodoro"  onclick="focusSwitchMode('pomodoro')">Pomodoro</button>
           </div>
+        </div>
+
+        <!-- Subject Selector (B1) -->
+        <div class="focus-subject-wrap">
+          <div class="focus-subject-label">Subject</div>
+          <div class="focus-subject-row" id="focus-subject-row">
+            <button class="focus-subject-chip active" data-subject="Study"       onclick="focusSelectSubject('Study')">Study</button>
+            <button class="focus-subject-chip"        data-subject="Business / YT" onclick="focusSelectSubject('Business / YT')">Business / YT</button>
+            <button class="focus-subject-chip"        data-subject="Gym"         onclick="focusSelectSubject('Gym')">Gym</button>
+            <button class="focus-subject-chip"        data-subject="Reading"     onclick="focusSelectSubject('Reading')">Reading</button>
+            <button class="focus-subject-chip"        data-subject="Other"       onclick="focusSelectSubject('Other')">Other</button>
+          </div>
+        </div>
+
+        <!-- Session Intent (B1) -->
+        <div class="focus-intent-wrap">
+          <div class="focus-intent-label">Session Intent</div>
+          <input type="text" class="focus-intent-input" id="focus-intent-input"
+                 placeholder="What will you accomplish this session?"
+                 maxlength="100"
+                 oninput="TIMER.intent = this.value; updateRingInner();" />
         </div>
 
         <!-- Tag Selector -->
@@ -2327,6 +2483,10 @@
       initFocusPage(); // Stage 3
       initReviewPage(); // Stage 4
       initSettingsPage(); // Stage 5
+      syncPullOnLogin().catch(err => {
+        console.warn('[DailyOS] Sync pull failed:', err);
+        _setSyncError();
+      });
     }
 
     // ── NAVIGATION ────────────────────────────────────
@@ -2361,6 +2521,26 @@
     // ── KEYBOARD SUPPORT ──────────────────────────────
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !authScreen.classList.contains('hidden')) handleAuth();
+
+      // Space bar: toggle Start/Pause (only when no input focused)
+      if (e.key === ' ' || e.code === 'Space') {
+        const tag = document.activeElement?.tagName;
+        if (tag && (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT')) return;
+        // Only act when focus page is active
+        const focusPageActive = document.getElementById('page-focus')?.classList.contains('active');
+        if (!focusPageActive) return;
+        e.preventDefault();
+        if (TIMER.state === 'idle')    focusStart();
+        else if (TIMER.state === 'running') focusPause();
+        else if (TIMER.state === 'paused')  focusResume();
+      }
+
+      // Escape: show abandon banner if timer running
+      if (e.key === 'Escape') {
+        const focusPageActive = document.getElementById('page-focus')?.classList.contains('active');
+        if (!focusPageActive) return;
+        if (TIMER.state === 'running' || TIMER.state === 'paused') focusAbandonRequest();
+      }
     });
 
 
@@ -2461,6 +2641,7 @@
       loadIntention();
       calculateStreak();
       renderMetrics();
+      renderInsightCard();
       renderPillars();
       renderHabits();
       loadQuote();
@@ -2484,10 +2665,12 @@
       const key   = `dos_intention_${getTodayKey()}`;
       const input = document.getElementById('today-intention');
       input.value = localStorage.getItem(key) || '';
-      input.addEventListener('input', () => {
+      input.oninput = () => {
         localStorage.setItem(key, input.value);
+        clearTimeout(_intentionSyncTimer);
+        _intentionSyncTimer = setTimeout(() => { syncPushDailyData(getTodayKey()); }, 1500);
         flashSaved();
-      });
+      };
     }
 
     function flashSaved() {
@@ -2575,6 +2758,7 @@
           <div class="metric-sub">this week</div>
         </div>
       `;
+      renderInsightCard();
     }
 
     function getWeekFocusSeconds(sessions) {
@@ -2682,17 +2866,22 @@
 
       const badge = document.getElementById(`pillar-badge-${pillarId}`);
       if (badge) {
-        badge.textContent = allDone ? 'WIN ✓' : `${checkedCount}/${pillar.items.length}`;
+        badge.textContent = allDone ? 'WIN ✓' : `${checkedCount}/${items.length}`;
         badge.className   = allDone ? 'pillar-badge win' : 'pillar-badge';
       }
       const card = document.getElementById(`pillar-card-${pillarId}`);
       if (card) card.classList.toggle('win-state', allDone);
 
       renderMetrics();
+      renderInsightCard();
+      syncPushDailyData(today);
     }
 
     function savePillarNotes(pillarId, value) {
-      localStorage.setItem(`dos_notes_${pillarId}_${getTodayKey()}`, value);
+      const today = getTodayKey();
+      localStorage.setItem(`dos_notes_${pillarId}_${today}`, value);
+      clearTimeout(_notesSyncTimers[pillarId]);
+      _notesSyncTimers[pillarId] = setTimeout(() => { syncPushDailyData(today); }, 1500);
     }
 
     /* ─────────────────────────────────────────────────
@@ -2739,6 +2928,8 @@
 
       updateHabitCount();
       renderMetrics();
+      renderInsightCard();
+      syncPushDailyData(today);
     }
 
     function updateHabitCount() {
@@ -2789,6 +2980,7 @@
         // Remove listeners
         inputEl.onkeydown = null;
         inputEl.onblur    = null;
+        syncPushDailyData(getTodayKey());
       }
 
       inputEl.onkeydown = (e) => {
@@ -2840,7 +3032,9 @@
       pomoPhase:     'focus',
       pomoIndex:     0,
       pomoCycleCount: 1,
-      pomoSettings: { focusMins: 25, shortBreakMins: 5, longBreakMins: 15, longBreakAfter: 4 }
+      pomoSettings: { focusMins: 25, shortBreakMins: 5, longBreakMins: 15, longBreakAfter: 4 },
+      subject:     'Study',
+      intent:      ''
     };
 
     // ── INIT FOCUS PAGE ───────────────────────────────
@@ -3024,13 +3218,18 @@
       }
 
       // Status
-      if (TIMER.state === 'idle')   statusEl.textContent = 'Ready';
+      if (TIMER.state === 'idle') {
+        statusEl.textContent = 'Ready';
+      }
       if (TIMER.state === 'running') {
         if (TIMER.mode === 'pomodoro') {
           const phase = TIMER.pomoPhase === 'focus'
             ? `Focus ${TIMER.pomoIndex + 1} of ${TIMER.pomoSettings.longBreakAfter}`
             : TIMER.pomoPhase === 'short' ? 'Short Break' : 'Long Break';
           statusEl.textContent = phase;
+        } else if (TIMER.intent) {
+          const truncated = TIMER.intent.length > 28 ? TIMER.intent.slice(0, 28) + '…' : TIMER.intent;
+          statusEl.textContent = truncated;
         } else {
           statusEl.textContent = 'Running';
         }
@@ -3223,7 +3422,9 @@
         duration:    Math.round(TIMER.elapsed),
         completedAt: new Date().toISOString(),
         completed:   true,
-        mode:        TIMER.mode
+        mode:        TIMER.mode,
+        subject:     TIMER.subject || 'Study',
+        intent:      TIMER.intent  || ''
       };
       const sessions = JSON.parse(localStorage.getItem('dos_sessions') || '[]');
       sessions.push(session);
@@ -3231,6 +3432,7 @@
       renderFocusGoalBar();
       renderRecentSessions();
       renderMetrics();
+      syncPushSession(session);
     }
 
     // ── POMODORO LOGIC ────────────────────────────────
@@ -3317,6 +3519,7 @@
       renderPomoDots();
       if (TIMER.state === 'idle') { TIMER.duration = s.focusMins * 60; updateRingInner(); }
       showToast('Pomodoro settings saved.', 'success');
+      syncPushSettings();
     }
 
     // ── GOAL BAR ──────────────────────────────────────
@@ -3370,6 +3573,7 @@
             <div class="focus-session-dot" style="background:${s.tagColor || '#a8a8bc'}"></div>
             <div class="focus-session-info">
               <div class="focus-session-name">${s.tag || 'Focus'}</div>
+              ${s.intent ? `<div class="focus-session-intent">${escHtml(s.intent)}</div>` : ''}
               <div class="focus-session-dur">${formatMinutes(s.duration)}</div>
             </div>
             <div class="focus-session-time">${timeStr}</div>
@@ -3695,7 +3899,12 @@
 
       // B1: All-time stats
       const allTimeSec   = all.reduce((a, s) => a + (s.duration || 0), 0);
-      const streak       = parseInt(localStorage.getItem('dos_streak') || '0');
+      const streakRaw    = localStorage.getItem('dos_streak');
+      let streakCount    = 0;
+      try {
+        const streakParsed = JSON.parse(streakRaw || '0');
+        streakCount = typeof streakParsed === 'object' ? (streakParsed.count || 0) : parseInt(streakParsed) || 0;
+      } catch { streakCount = 0; }
       const totalSess    = all.length;
 
       // Best week: group by Mon-start week key
@@ -3717,7 +3926,7 @@
         </div>
         <div class="metric-card">
           <div class="metric-label">Current Streak</div>
-          <div class="metric-value">${streak} 🔥</div>
+          <div class="metric-value">${streakCount} 🔥</div>
         </div>
         <div class="metric-card">
           <div class="metric-label">Best Week</div>
@@ -3851,7 +4060,12 @@
       }
 
       // Longest streak
-      const longestStreak = parseInt(localStorage.getItem('dos_longest_streak') || localStorage.getItem('dos_streak') || '0');
+      const streakRawPR = localStorage.getItem('dos_streak');
+      let longestStreak = 0;
+      try {
+        const p = JSON.parse(streakRawPR || '0');
+        longestStreak = typeof p === 'object' ? (p.count || 0) : parseInt(p) || 0;
+      } catch { longestStreak = 0; }
 
       const records = [
         { icon: '⏱', label: 'Longest Session', value: longestStr },
@@ -3923,6 +4137,7 @@
 
       // Flash saved indicator
       _settingFlashSaved('settings-username-saved');
+      syncPushSettings();
     }
 
     // ── settingSaveFocusGoal ──────────────────────────
@@ -3933,6 +4148,7 @@
         localStorage.setItem('dos_focus_goal_hrs', String(val));
         if (typeof renderFocusGoalBar === 'function') renderFocusGoalBar();
         _settingFlashSaved('settings-goal-saved');
+        syncPushSettings();
       }
     }
 
@@ -3953,6 +4169,7 @@
           chip.classList.toggle('active', parseInt(chip.dataset.dur) === secs);
         });
       }
+      syncPushSettings();
     }
 
     // ── settingSaveQuote ──────────────────────────────
@@ -3963,6 +4180,7 @@
       else     localStorage.removeItem('dos_quote');
       if (typeof loadQuote === 'function') loadQuote();
       _settingFlashSaved('settings-quote-saved');
+      syncPushSettings();
     }
 
     // ── settingExportCSV ──────────────────────────────
@@ -4137,6 +4355,7 @@
       _savePillarEditorItems(pillarKey, items);
       input.value = '';
       _renderPillarEditorPanel(pillarKey); // re-render list
+      syncPushSettings();
     }
 
     function deletePillarItem(pillarKey, itemId) {
@@ -4144,6 +4363,7 @@
       const updated = items.filter(i => i.id !== itemId);
       _savePillarEditorItems(pillarKey, updated);
       _renderPillarEditorPanel(pillarKey);
+      syncPushSettings();
     }
 
     // ── Tag Manager ───────────────────────────────────
@@ -4206,6 +4426,7 @@
       saveFocusTags(tags);
       if (typeof renderFocusTags === 'function') renderFocusTags();
       _renderTagManagerPanel();
+      syncPushSettings();
     }
 
     function settingDeleteTag(tagId) {
@@ -4214,6 +4435,7 @@
       saveFocusTags(updated);
       if (typeof renderFocusTags === 'function') renderFocusTags();
       _renderTagManagerPanel();
+      syncPushSettings();
     }
 
     // ── Helper: flash saved indicator ─────────────────
@@ -4222,6 +4444,277 @@
       if (!el) return;
       el.classList.add('visible');
       setTimeout(() => el.classList.remove('visible'), 2000);
+    }
+
+    /* ══════════════════════════════════════════════════
+       STAGE 6 — CLOUD SYNC + FEATURES
+    ══════════════════════════════════════════════════ */
+
+    // ── Sync debounce timers ──────────────────────────
+    let _intentionSyncTimer = null;
+    let _notesSyncTimers    = {};
+    let _syncErrorTimer     = null;
+
+    // ── _setSyncError ─────────────────────────────────
+    function _setSyncError() {
+      setSyncState('error');
+      clearTimeout(_syncErrorTimer);
+      _syncErrorTimer = setTimeout(() => setSyncState('synced'), 4000);
+    }
+
+    // ── syncPullOnLogin ───────────────────────────────
+    async function syncPullOnLogin() {
+      if (!currentUser) return;
+      setSyncState('syncing');
+      try {
+        // Pull settings
+        const { data: settingsRows } = await supa
+          .from('dos_settings')
+          .select('data')
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
+
+        if (settingsRows?.data) {
+          const d = settingsRows.data;
+          if (d.dos_username       != null) localStorage.setItem('dos_username', d.dos_username);
+          if (d.dos_focus_goal_hrs != null) localStorage.setItem('dos_focus_goal_hrs', String(d.dos_focus_goal_hrs));
+          if (d.dos_default_duration_mins != null) localStorage.setItem('dos_default_duration_mins', String(d.dos_default_duration_mins));
+          if (d.dos_tags           != null) localStorage.setItem('dos_tags', typeof d.dos_tags === 'string' ? d.dos_tags : JSON.stringify(d.dos_tags));
+          if (d.dos_pillar_career_items   != null) localStorage.setItem('dos_pillar_career_items',   typeof d.dos_pillar_career_items   === 'string' ? d.dos_pillar_career_items   : JSON.stringify(d.dos_pillar_career_items));
+          if (d.dos_pillar_physical_items != null) localStorage.setItem('dos_pillar_physical_items', typeof d.dos_pillar_physical_items === 'string' ? d.dos_pillar_physical_items : JSON.stringify(d.dos_pillar_physical_items));
+          if (d.dos_pillar_spiritual_items!= null) localStorage.setItem('dos_pillar_spiritual_items',typeof d.dos_pillar_spiritual_items=== 'string' ? d.dos_pillar_spiritual_items: JSON.stringify(d.dos_pillar_spiritual_items));
+          if (d.dos_habit_items    != null) localStorage.setItem('dos_habit_items',    typeof d.dos_habit_items    === 'string' ? d.dos_habit_items    : JSON.stringify(d.dos_habit_items));
+          if (d.dos_pomo_settings  != null) localStorage.setItem('dos_pomo_settings',  typeof d.dos_pomo_settings  === 'string' ? d.dos_pomo_settings  : JSON.stringify(d.dos_pomo_settings));
+          if (d.dos_streak         != null) localStorage.setItem('dos_streak',         typeof d.dos_streak         === 'string' ? d.dos_streak         : JSON.stringify(d.dos_streak));
+          if (d.dos_quote          != null && d.dos_quote !== '') localStorage.setItem('dos_quote', d.dos_quote);
+        }
+
+        // Pull sessions
+        const { data: sessionRows } = await supa
+          .from('dos_sessions')
+          .select('*')
+          .eq('user_id', currentUser.id);
+
+        if (sessionRows && sessionRows.length > 0) {
+          const mapped = sessionRows.map(row => ({
+            id:          row.id,
+            date:        row.date,
+            tag:         row.tag,
+            tagColor:    row.tag_color,
+            duration:    row.duration,
+            completedAt: row.completed_at,
+            completed:   row.completed,
+            mode:        row.mode,
+            subject:     row.subject || 'Study',
+            intent:      row.intent  || ''
+          }));
+          localStorage.setItem('dos_sessions', JSON.stringify(mapped));
+        }
+
+        // Pull daily data
+        const { data: dailyRows } = await supa
+          .from('dos_daily')
+          .select('date, data')
+          .eq('user_id', currentUser.id);
+
+        if (dailyRows) {
+          dailyRows.forEach(row => {
+            const date = row.date;
+            const d    = row.data || {};
+
+            // Pillar checks
+            ['career','physical','spiritual'].forEach(pillar => {
+              const pKey = `pillar_${pillar}`;
+              if (d[pKey] && typeof d[pKey] === 'object') {
+                Object.entries(d[pKey]).forEach(([itemId, val]) => {
+                  localStorage.setItem(`dos_pillar_${pillar}_${itemId}_${date}`, String(val));
+                });
+              }
+            });
+
+            // Habit checks
+            if (d.habits && typeof d.habits === 'object') {
+              Object.entries(d.habits).forEach(([habitId, val]) => {
+                localStorage.setItem(`dos_habit_${habitId}_${date}`, String(val));
+              });
+            }
+
+            // Intention
+            if (d.intention != null) localStorage.setItem(`dos_intention_${date}`, d.intention);
+
+            // Notes
+            ['career','physical','spiritual'].forEach(pillar => {
+              const nKey = `notes_${pillar}`;
+              if (d[nKey] != null) localStorage.setItem(`dos_notes_${pillar}_${date}`, d[nKey]);
+            });
+
+            // Quote (only if non-empty)
+            if (d.quote && d.quote !== '') localStorage.setItem('dos_quote', d.quote);
+          });
+        }
+
+        setSyncState('synced');
+        initTodayPage();
+        initSettingsPage();
+        renderFocusGoalBar();
+        renderRecentSessions();
+
+      } catch (err) {
+        console.warn('[DailyOS] syncPullOnLogin error:', err);
+        setSyncState('error');
+        showToast('Sync failed. Working offline.', 'error');
+        clearTimeout(_syncErrorTimer);
+        _syncErrorTimer = setTimeout(() => setSyncState('synced'), 4000);
+        throw err;
+      }
+    }
+
+    // ── syncPushSession ───────────────────────────────
+    async function syncPushSession(session) {
+      if (!currentUser) return;
+      setSyncState('syncing');
+      try {
+        await supa.from('dos_sessions').upsert({
+          id:           session.id,
+          user_id:      currentUser.id,
+          date:         session.date,
+          tag:          session.tag,
+          tag_color:    session.tagColor,
+          duration:     session.duration,
+          completed_at: session.completedAt,
+          completed:    session.completed,
+          mode:         session.mode
+        }, { onConflict: 'id' });
+        setSyncState('synced');
+      } catch (err) {
+        console.warn('[DailyOS] syncPushSession error:', err);
+        _setSyncError();
+      }
+    }
+
+    // ── syncPushDailyData ─────────────────────────────
+    async function syncPushDailyData(date) {
+      if (!currentUser) return;
+      try {
+        // Build pillar checks
+        const pillarCareer   = {};
+        const pillarPhysical = {};
+        const pillarSpiritual= {};
+        getPillarItems('career').forEach(item => {
+          pillarCareer[item.id] = localStorage.getItem(`dos_pillar_career_${item.id}_${date}`) === 'true';
+        });
+        getPillarItems('physical').forEach(item => {
+          pillarPhysical[item.id] = localStorage.getItem(`dos_pillar_physical_${item.id}_${date}`) === 'true';
+        });
+        getPillarItems('spiritual').forEach(item => {
+          pillarSpiritual[item.id] = localStorage.getItem(`dos_pillar_spiritual_${item.id}_${date}`) === 'true';
+        });
+
+        // Build habit checks
+        const habits = {};
+        getHabitItems().forEach(h => {
+          habits[h.id] = localStorage.getItem(`dos_habit_${h.id}_${date}`) === 'true';
+        });
+
+        const dailyData = {
+          pillar_career:    pillarCareer,
+          pillar_physical:  pillarPhysical,
+          pillar_spiritual: pillarSpiritual,
+          habits,
+          intention:        localStorage.getItem(`dos_intention_${date}`)       || '',
+          notes_career:     localStorage.getItem(`dos_notes_career_${date}`)    || '',
+          notes_physical:   localStorage.getItem(`dos_notes_physical_${date}`)  || '',
+          notes_spiritual:  localStorage.getItem(`dos_notes_spiritual_${date}`) || '',
+          quote:            localStorage.getItem('dos_quote')                   || ''
+        };
+
+        await supa.from('dos_daily').upsert({
+          id:         currentUser.id + '_' + date,
+          user_id:    currentUser.id,
+          date:       date,
+          data:       dailyData,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+      } catch (err) {
+        console.warn('[DailyOS] syncPushDailyData error:', err);
+        // Silent - offline tolerant
+      }
+    }
+
+    // ── syncPushSettings ──────────────────────────────
+    async function syncPushSettings() {
+      if (!currentUser) return;
+      try {
+        const settingsData = {
+          dos_username:               localStorage.getItem('dos_username') || '',
+          dos_focus_goal_hrs:         parseFloat(localStorage.getItem('dos_focus_goal_hrs') || '4'),
+          dos_default_duration_mins:  parseInt(localStorage.getItem('dos_default_duration_mins') || '25'),
+          dos_tags:                   localStorage.getItem('dos_tags') || '',
+          dos_pillar_career_items:    localStorage.getItem('dos_pillar_career_items') || '',
+          dos_pillar_physical_items:  localStorage.getItem('dos_pillar_physical_items') || '',
+          dos_pillar_spiritual_items: localStorage.getItem('dos_pillar_spiritual_items') || '',
+          dos_habit_items:            localStorage.getItem('dos_habit_items') || '',
+          dos_pomo_settings:          localStorage.getItem('dos_pomo_settings') || '',
+          dos_streak:                 localStorage.getItem('dos_streak') || '',
+          dos_quote:                  localStorage.getItem('dos_quote') || ''
+        };
+
+        await supa.from('dos_settings').upsert({
+          user_id:    currentUser.id,
+          data:       settingsData,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
+      } catch (err) {
+        console.warn('[DailyOS] syncPushSettings error:', err);
+        // Silent
+      }
+    }
+
+    /* ── renderInsightCard (Part C) ── */
+    function renderInsightCard() {
+      const iconEl = document.getElementById('today-insight-icon');
+      const textEl = document.getElementById('today-insight-text');
+      if (!iconEl || !textEl) return;
+
+      const today   = getTodayKey();
+      const hour    = new Date().getHours();
+      const streakObj = JSON.parse(localStorage.getItem('dos_streak') || '{"count":0}');
+      const streakN   = typeof streakObj === 'object' ? (streakObj.count || 0) : parseInt(streakObj) || 0;
+
+      const sessions = JSON.parse(localStorage.getItem('dos_sessions') || '[]');
+      const todaySec = sessions.filter(s => s.date === today && s.completed).reduce((a,s) => a + (s.duration||0), 0);
+      const goalHrs  = parseFloat(localStorage.getItem('dos_focus_goal_hrs') || '4');
+      const goalSec  = goalHrs * 3600;
+
+      const habitItems  = getHabitItems();
+      const totalHabits = habitItems.length;
+      const doneHabits  = habitItems.filter(h => localStorage.getItem(`dos_habit_${h.id}_${today}`) === 'true').length;
+      const allHabitsDone = totalHabits > 0 && doneHabits === totalHabits;
+
+      let icon = '🔱', text = 'Jai Bholenath. Give your best today.';
+
+      if (streakN >= 7 && allHabitsDone) {
+        icon = '🏆'; text = `Flawless day. Streak is at ${streakN} days. Keep going.`;
+      } else if (streakN >= 3) {
+        icon = '🔥'; text = `Day ${streakN} streak. Don't break it today.`;
+      } else if (todaySec === 0 && hour > 10) {
+        icon = '⏱'; text = 'No focus sessions yet today. Start one now.';
+      } else if (goalSec > 0 && todaySec >= goalSec) {
+        icon = '✅'; text = 'Daily focus goal reached. Excellent work.';
+      } else if (doneHabits === 0 && hour > 9) {
+        icon = '📋'; text = 'No habits checked yet. Start ticking them off.';
+      }
+
+      iconEl.textContent = icon;
+      textEl.textContent = text;
+    }
+
+    /* ── focusSelectSubject (Part B1) ── */
+    function focusSelectSubject(subject) {
+      TIMER.subject = subject;
+      document.querySelectorAll('.focus-subject-chip').forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.subject === subject);
+      });
     }
 
   </script>
