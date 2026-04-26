@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet" />
 
   <!-- Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
 
   <style>
     /* ─────────────────────────────────────────
@@ -2379,7 +2379,13 @@
     // ── SUPABASE ──────────────────────────────────────
     const SUPABASE_URL = 'https://hzfxrwmzmwvleblmfpqv.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Znhyd216bXd2bGVibG1mcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMzYyNTIsImV4cCI6MjA5MjcxMjI1Mn0.p9sxIc9W6rlCTbFm5N-PJTWE8wYj6CQbJiicOjm9gcY';
-    const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    if (typeof supabase === 'undefined') {
+  document.getElementById('loading-screen').classList.add('hidden');
+  document.getElementById('auth-screen').classList.remove('hidden');
+  document.getElementById('auth-error').textContent = 'Failed to load. Please refresh.';
+  throw new Error('Supabase SDK failed to load');
+}
+const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // ── STATE ─────────────────────────────────────────
     let currentUser     = null;
