@@ -1713,22 +1713,128 @@
     .today-insight-icon { font-size: 18px; flex-shrink: 0; }
     .today-insight-text { font-size: 13px; color: var(--text2); line-height: 1.5; }
 
-    /* ── Subject / Intent selectors (B1) ── */
-    .focus-subject-label,
-    .focus-intent-label {
+    /* ── Session Config Bar & Drawer (Redesign) ── */
+    .focus-config-bar {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: border-color 0.2s;
+    }
+    .focus-config-bar:hover { border-color: var(--border2); }
+    .focus-config-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .focus-config-bar-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .focus-config-bar-tag {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .focus-config-bar-sep {
+      font-size: 13px;
+      color: var(--text3);
+      margin: 0 2px;
+    }
+    .focus-config-bar-cat {
+      font-size: 13px;
+      color: var(--text3);
+      white-space: nowrap;
+    }
+    .focus-config-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      margin-left: 12px;
+    }
+    .focus-config-bar-intent {
+      font-size: 12px;
+      color: var(--text3);
+      font-style: italic;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .focus-config-bar-chevron {
+      color: var(--text3);
+      font-size: 16px;
+      transition: transform 0.25s ease;
+      flex-shrink: 0;
+    }
+    .focus-config-bar.open .focus-config-bar-chevron { transform: rotate(90deg); }
+
+    .focus-config-drawer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      margin-bottom: 0;
+    }
+    .focus-config-drawer.open {
+      max-height: 540px;
+      margin-bottom: 20px;
+    }
+    .focus-config-drawer-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px 16px;
+    }
+    .focus-config-section-label {
       font-size: 10px;
       letter-spacing: 1px;
       text-transform: uppercase;
       color: var(--text3);
       margin-bottom: 8px;
     }
-    .focus-subject-row {
+    .focus-config-section-label.mt { margin-top: 16px; }
+
+    /* Category mode toggle */
+    .focus-cat-mode-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .focus-cat-mode-btn {
+      padding: 7px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--text3);
+    }
+    .focus-cat-mode-btn.active {
+      background: var(--bg4);
+      border-color: var(--border3);
+      color: var(--text);
+    }
+
+    /* Category chips (same as dur-chip) */
+    .focus-cat-chips {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin-bottom: 10px;
+      margin-bottom: 4px;
     }
-    .focus-subject-chip {
+    .focus-cat-chip {
       padding: 6px 14px;
       border-radius: var(--radius-sm);
       font-size: 12px;
@@ -1739,21 +1845,82 @@
       transition: all 0.2s;
       white-space: nowrap;
     }
-    .focus-subject-chip:hover { background: var(--bg4); color: var(--text); }
-    .focus-subject-chip.active {
+    .focus-cat-chip:hover { background: var(--bg4); color: var(--text); }
+    .focus-cat-chip.active {
       background: var(--accent-glow);
       border-color: var(--accent-dim);
       color: var(--accent);
       font-weight: 600;
     }
-    .focus-subject-wrap { margin-bottom: 16px; }
-    .focus-intent-wrap { margin-bottom: 20px; }
-    .focus-intent-input {
+
+    /* Inline project add form */
+    .focus-project-add-link {
+      font-size: 11px;
+      color: var(--text3);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 0;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      display: inline-block;
+      margin-top: 6px;
+    }
+    .focus-project-add-link:hover { color: var(--text2); }
+    .focus-project-add-form {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .focus-project-add-form.open { display: flex; }
+    .focus-project-name-input {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 5px 10px;
+      font-size: 12px;
+      color: var(--text);
+      outline: none;
+      flex: 1;
+      min-width: 100px;
+    }
+    .focus-project-name-input:focus { border-color: var(--accent-dim); }
+    .focus-project-color-input {
+      width: 28px; height: 28px;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      background: none;
+      cursor: pointer;
+      padding: 2px;
+    }
+    .focus-project-add-btn {
+      padding: 5px 12px;
+      background: var(--bg4);
+      border: 1px solid var(--border3);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .focus-project-add-btn:hover { border-color: var(--accent-dim); color: var(--accent); }
+    .focus-project-cancel-btn {
+      font-size: 11px;
+      color: var(--text3);
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Intent input inside drawer */
+    .focus-drawer-intent-input {
       background: transparent;
       border: none;
       border-bottom: 1px solid var(--border2);
       border-radius: 0;
-      padding: 10px 0;
+      padding: 8px 0;
       font-size: 14px;
       color: var(--text);
       font-family: 'DM Sans', sans-serif;
@@ -1762,10 +1929,34 @@
       outline: none;
       transition: border-bottom-color 0.2s ease;
     }
-    .focus-intent-input::placeholder { color: var(--text3); }
-    .focus-intent-input:focus { border-bottom-color: var(--accent-dim); }
+    .focus-drawer-intent-input::placeholder { color: var(--text3); }
+    .focus-drawer-intent-input:focus { border-bottom-color: var(--accent-dim); }
 
-    /* ── Session intent in recent list ── */
+    /* Set button */
+    .focus-config-set-btn {
+      display: block;
+      margin-left: auto;
+      margin-top: 16px;
+      padding: 8px 20px;
+      background: var(--bg4);
+      border: 1px solid var(--border3);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .focus-config-set-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+
+    /* Session subject/category in recent list */
+    .focus-session-subcat {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 1px;
+    }
+
+    /* Session intent in recent list */
     .focus-session-intent {
       font-size: 11px;
       color: var(--text3);
@@ -1906,36 +2097,64 @@
           </div>
         </div>
 
-        <!-- Subject Selector (B1) -->
-        <div class="focus-subject-wrap">
-          <div class="focus-subject-label">Subject</div>
-          <div class="focus-subject-row" id="focus-subject-row">
-            <button class="focus-subject-chip active" data-subject="Study"       onclick="focusSelectSubject('Study')">Study</button>
-            <button class="focus-subject-chip"        data-subject="Business / YT" onclick="focusSelectSubject('Business / YT')">Business / YT</button>
-            <button class="focus-subject-chip"        data-subject="Gym"         onclick="focusSelectSubject('Gym')">Gym</button>
-            <button class="focus-subject-chip"        data-subject="Reading"     onclick="focusSelectSubject('Reading')">Reading</button>
-            <button class="focus-subject-chip"        data-subject="Other"       onclick="focusSelectSubject('Other')">Other</button>
+        <!-- Session Config Bar -->
+        <div class="focus-config-bar" id="focus-config-bar" onclick="focusToggleConfigDrawer()">
+          <div class="focus-config-bar-left">
+            <div class="focus-config-bar-dot" id="focus-config-bar-dot" style="background:#a8a8bc"></div>
+            <span class="focus-config-bar-tag" id="focus-config-bar-tag">Focus</span>
+            <span class="focus-config-bar-sep">·</span>
+            <span class="focus-config-bar-cat" id="focus-config-bar-cat">Study</span>
+          </div>
+          <div class="focus-config-bar-right">
+            <span class="focus-config-bar-intent" id="focus-config-bar-intent"></span>
+            <span class="focus-config-bar-chevron">›</span>
           </div>
         </div>
 
-        <!-- Session Intent (B1) -->
-        <div class="focus-intent-wrap">
-          <div class="focus-intent-label">Session Intent</div>
-          <input type="text" class="focus-intent-input" id="focus-intent-input"
-                 placeholder="What will you accomplish this session?"
-                 maxlength="100"
-                 oninput="TIMER.intent = this.value; updateRingInner();" />
-        </div>
+        <!-- Session Config Drawer -->
+        <div class="focus-config-drawer" id="focus-config-drawer">
+          <div class="focus-config-drawer-card">
 
-        <!-- Tag Selector -->
-        <div class="focus-tag-row" id="focus-tag-row"></div>
-        <div class="focus-tag-add-wrap" id="focus-tag-add-wrap">
-          <button class="focus-tag-add-link" onclick="focusToggleAddTag()">+ Add tag</button>
-          <div class="focus-tag-add-form" id="focus-tag-add-form">
-            <input type="text"  class="focus-tag-add-input" id="focus-tag-name-input" placeholder="Tag name" maxlength="24" />
-            <input type="color" class="focus-tag-color-input" id="focus-tag-color-input" value="#a8a8bc" />
-            <button class="focus-tag-add-btn" onclick="focusAddTag()">Add</button>
-            <button class="focus-tag-cancel-link" onclick="focusToggleAddTag()">Cancel</button>
+            <!-- Section 1: Tag -->
+            <div class="focus-config-section-label">Tag</div>
+            <div class="focus-tag-row" id="focus-tag-row"></div>
+            <div class="focus-tag-add-wrap" id="focus-tag-add-wrap">
+              <button class="focus-tag-add-link" onclick="focusToggleAddTag()">+ Add tag</button>
+              <div class="focus-tag-add-form" id="focus-tag-add-form">
+                <input type="text"  class="focus-tag-add-input" id="focus-tag-name-input" placeholder="Tag name" maxlength="24" />
+                <input type="color" class="focus-tag-color-input" id="focus-tag-color-input" value="#a8a8bc" />
+                <button class="focus-tag-add-btn" onclick="focusAddTag()">Add</button>
+                <button class="focus-tag-cancel-link" onclick="focusToggleAddTag()">Cancel</button>
+              </div>
+            </div>
+
+            <!-- Section 2: Category -->
+            <div class="focus-config-section-label mt">Category</div>
+            <div class="focus-cat-mode-row">
+              <button class="focus-cat-mode-btn active" id="focus-cat-mode-subject" onclick="focusSelectCategoryMode('subject')">📚 Subject</button>
+              <button class="focus-cat-mode-btn"        id="focus-cat-mode-project" onclick="focusSelectCategoryMode('project')">🎬 Project</button>
+            </div>
+            <div class="focus-cat-chips" id="focus-cat-chips"></div>
+            <div id="focus-project-add-area" style="display:none">
+              <button class="focus-project-add-link" onclick="focusToggleProjectAddForm()">+ Add project</button>
+              <div class="focus-project-add-form" id="focus-project-add-form">
+                <input type="text"  class="focus-project-name-input" id="focus-project-name-input" placeholder="Project name" maxlength="32" />
+                <input type="color" class="focus-project-color-input" id="focus-project-color-input" value="#a8a8bc" />
+                <button class="focus-project-add-btn" onclick="focusAddProject()">Add</button>
+                <button class="focus-project-cancel-btn" onclick="focusToggleProjectAddForm()">Cancel</button>
+              </div>
+            </div>
+
+            <!-- Section 3: Session Intent -->
+            <div class="focus-config-section-label mt">Session Intent</div>
+            <input type="text" class="focus-drawer-intent-input" id="focus-intent-input"
+                   placeholder="What will you accomplish this session?"
+                   maxlength="100"
+                   oninput="TIMER.intent = this.value; updateRingInner(); updateConfigBarSummary();" />
+
+            <!-- Section 4: Set button -->
+            <button class="focus-config-set-btn" onclick="focusToggleConfigDrawer()">Set</button>
+
           </div>
         </div>
 
@@ -2376,6 +2595,10 @@
     const SUPABASE_URL = 'https://hzfxrwmzmwvleblmfpqv.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Znhyd216bXd2bGVibG1mcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMzYyNTIsImV4cCI6MjA5MjcxMjI1Mn0.p9sxIc9W6rlCTbFm5N-PJTWE8wYj6CQbJiicOjm9gcY';
     const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // IMPORTANT: Run this SQL in your Supabase SQL editor before deploying:
+    // ALTER TABLE public.dos_sessions ADD COLUMN IF NOT EXISTS subject text DEFAULT 'Study';
+    // ALTER TABLE public.dos_sessions ADD COLUMN IF NOT EXISTS intent text DEFAULT '';
 
     // ── STATE ─────────────────────────────────────────
     let currentUser     = null;
@@ -3033,8 +3256,10 @@
       pomoIndex:     0,
       pomoCycleCount: 1,
       pomoSettings: { focusMins: 25, shortBreakMins: 5, longBreakMins: 15, longBreakAfter: 4 },
-      subject:     'Study',
-      intent:      ''
+      subject:      'Study',
+      category:     'Study',
+      categoryMode: 'subject',
+      intent:       ''
     };
 
     // ── INIT FOCUS PAGE ───────────────────────────────
@@ -3049,6 +3274,11 @@
       const tags = getFocusTags();
       TIMER.tag = tags[0] || DEFAULT_TAGS[0];
 
+      // Init category state
+      TIMER.categoryMode = 'subject';
+      TIMER.category     = 'Study';
+      TIMER.subject      = 'Study';
+
       renderFocusTags();
       renderFocusControls();
       updateRingArc(1);
@@ -3057,6 +3287,8 @@
       renderRecentSessions();
       renderPomoDots();
       applyRingTagColor();
+      renderCategoryChips();
+      updateConfigBarSummary();
     }
 
     // ── TAG RENDERING ─────────────────────────────────
@@ -3086,6 +3318,7 @@
       });
       document.getElementById('focus-ring-tag').textContent = tag.name;
       applyRingTagColor();
+      updateConfigBarSummary();
     }
 
     function applyRingTagColor() {
@@ -3262,17 +3495,25 @@
     // ── CONTROLS ──────────────────────────────────────
     function renderFocusControls() {
       const el = document.getElementById('focus-controls');
+      const bar = document.getElementById('focus-config-bar');
+      const drawer = document.getElementById('focus-config-drawer');
+
       if (TIMER.state === 'idle') {
         el.innerHTML = `<button class="focus-btn-primary" onclick="focusStart()">Start Session</button>`;
+        if (bar) bar.style.display = 'flex';
       } else if (TIMER.state === 'running') {
         el.innerHTML = `
           <button class="focus-btn-secondary" onclick="focusPause()">Pause</button>
           <button class="focus-btn-danger"    onclick="focusAbandonRequest()">Abandon</button>`;
+        if (bar) bar.style.display = 'none';
+        if (drawer) drawer.classList.remove('open');
       } else if (TIMER.state === 'paused') {
         el.innerHTML = `
           <button class="focus-btn-primary"   onclick="focusResume()">Resume</button>
           <button class="focus-btn-secondary" onclick="focusStopAndSave()">Stop &amp; Save</button>
           <button class="focus-btn-danger"    onclick="focusAbandonRequest()">Abandon</button>`;
+        if (bar) bar.style.display = 'none';
+        if (drawer) drawer.classList.remove('open');
       }
     }
 
@@ -3415,16 +3656,17 @@
     function focusSaveSession() {
       if (!TIMER.elapsed || TIMER.elapsed < 5) return; // skip trivial sessions
       const session = {
-        id:          'sess_' + Date.now(),
-        date:        getTodayKey(),
-        tag:         TIMER.tag ? TIMER.tag.name : 'Focus',
-        tagColor:    TIMER.tag ? TIMER.tag.color : '#a8a8bc',
-        duration:    Math.round(TIMER.elapsed),
-        completedAt: new Date().toISOString(),
-        completed:   true,
-        mode:        TIMER.mode,
-        subject:     TIMER.subject || 'Study',
-        intent:      TIMER.intent  || ''
+        id:           'sess_' + Date.now(),
+        date:         getTodayKey(),
+        tag:          TIMER.tag ? TIMER.tag.name : 'Focus',
+        tagColor:     TIMER.tag ? TIMER.tag.color : '#a8a8bc',
+        duration:     Math.round(TIMER.elapsed),
+        completedAt:  new Date().toISOString(),
+        completed:    true,
+        mode:         TIMER.mode,
+        subject:      TIMER.category || TIMER.subject || 'Study',
+        categoryMode: TIMER.categoryMode || 'subject',
+        intent:       TIMER.intent  || ''
       };
       const sessions = JSON.parse(localStorage.getItem('dos_sessions') || '[]');
       sessions.push(session);
@@ -3572,7 +3814,8 @@
           <div class="focus-session-row">
             <div class="focus-session-dot" style="background:${s.tagColor || '#a8a8bc'}"></div>
             <div class="focus-session-info">
-              <div class="focus-session-name">${s.tag || 'Focus'}</div>
+              <div class="focus-session-name">${escHtml(s.tag || 'Focus')}</div>
+              ${(s.subject || s.category) ? `<div class="focus-session-subcat">${escHtml(s.subject || s.category)}</div>` : ''}
               ${s.intent ? `<div class="focus-session-intent">${escHtml(s.intent)}</div>` : ''}
               <div class="focus-session-dur">${formatMinutes(s.duration)}</div>
             </div>
@@ -4487,6 +4730,7 @@
           if (d.dos_pomo_settings  != null) localStorage.setItem('dos_pomo_settings',  typeof d.dos_pomo_settings  === 'string' ? d.dos_pomo_settings  : JSON.stringify(d.dos_pomo_settings));
           if (d.dos_streak         != null) localStorage.setItem('dos_streak',         typeof d.dos_streak         === 'string' ? d.dos_streak         : JSON.stringify(d.dos_streak));
           if (d.dos_quote          != null && d.dos_quote !== '') localStorage.setItem('dos_quote', d.dos_quote);
+          if (d.dos_projects       != null && d.dos_projects !== '') localStorage.setItem('dos_projects', typeof d.dos_projects === 'string' ? d.dos_projects : JSON.stringify(d.dos_projects));
         }
 
         // Pull sessions
@@ -4583,7 +4827,9 @@
           duration:     session.duration,
           completed_at: session.completedAt,
           completed:    session.completed,
-          mode:         session.mode
+          mode:         session.mode,
+          subject:      session.subject || 'Study',
+          intent:       session.intent  || ''
         }, { onConflict: 'id' });
         setSyncState('synced');
       } catch (err) {
@@ -4656,7 +4902,8 @@
           dos_habit_items:            localStorage.getItem('dos_habit_items') || '',
           dos_pomo_settings:          localStorage.getItem('dos_pomo_settings') || '',
           dos_streak:                 localStorage.getItem('dos_streak') || '',
-          dos_quote:                  localStorage.getItem('dos_quote') || ''
+          dos_quote:                  localStorage.getItem('dos_quote') || '',
+          dos_projects:               localStorage.getItem('dos_projects') || ''
         };
 
         await supa.from('dos_settings').upsert({
@@ -4709,12 +4956,142 @@
       textEl.textContent = text;
     }
 
-    /* ── focusSelectSubject (Part B1) ── */
-    function focusSelectSubject(subject) {
-      TIMER.subject = subject;
-      document.querySelectorAll('.focus-subject-chip').forEach(chip => {
-        chip.classList.toggle('active', chip.dataset.subject === subject);
-      });
+    /* ══════════════════════════════════════════════════
+       STAGE 7 — SESSION CONFIG DRAWER
+    ══════════════════════════════════════════════════ */
+
+    const SUBJECT_CHIPS = [
+      { name: '📖 Study',       value: 'Study' },
+      { name: '🎬 Business/YT', value: 'Business/YT' },
+      { name: '🏋️ Gym',         value: 'Gym' },
+      { name: '📚 Reading',     value: 'Reading' },
+      { name: 'Other',          value: 'Other' }
+    ];
+
+    function getProjects() {
+      try { return JSON.parse(localStorage.getItem('dos_projects') || '[]'); }
+      catch { return []; }
+    }
+    function saveProjects(arr) {
+      localStorage.setItem('dos_projects', JSON.stringify(arr));
+      syncPushSettings();
+    }
+
+    // ── Toggle config drawer ──────────────────────────
+    function focusToggleConfigDrawer() {
+      if (TIMER.state !== 'idle') return;
+      const drawer = document.getElementById('focus-config-drawer');
+      const bar    = document.getElementById('focus-config-bar');
+      const isOpen = drawer.classList.toggle('open');
+      bar.classList.toggle('open', isOpen);
+    }
+
+    // ── Update config bar summary ─────────────────────
+    function updateConfigBarSummary() {
+      const dotEl    = document.getElementById('focus-config-bar-dot');
+      const tagEl    = document.getElementById('focus-config-bar-tag');
+      const catEl    = document.getElementById('focus-config-bar-cat');
+      const intentEl = document.getElementById('focus-config-bar-intent');
+      if (!dotEl) return;
+
+      const tagColor = TIMER.tag ? TIMER.tag.color : '#a8a8bc';
+      const tagName  = TIMER.tag ? TIMER.tag.name  : 'Focus';
+      const catName  = TIMER.category || 'Study';
+      const intent   = TIMER.intent || '';
+
+      dotEl.style.background = tagColor;
+      tagEl.textContent      = tagName;
+      catEl.textContent      = catName;
+      intentEl.textContent   = intent.length > 24 ? intent.slice(0, 24) + '…' : intent;
+    }
+
+    // ── Category mode toggle ──────────────────────────
+    function focusSelectCategoryMode(mode) {
+      TIMER.categoryMode = mode;
+      document.getElementById('focus-cat-mode-subject').classList.toggle('active', mode === 'subject');
+      document.getElementById('focus-cat-mode-project').classList.toggle('active', mode === 'project');
+      const projectArea = document.getElementById('focus-project-add-area');
+      if (projectArea) projectArea.style.display = mode === 'project' ? 'block' : 'none';
+      renderCategoryChips();
+    }
+
+    // ── Render category chips ─────────────────────────
+    function renderCategoryChips() {
+      const container = document.getElementById('focus-cat-chips');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (TIMER.categoryMode === 'subject') {
+        SUBJECT_CHIPS.forEach(chip => {
+          const btn = document.createElement('button');
+          btn.className = 'focus-cat-chip' + (TIMER.category === chip.value ? ' active' : '');
+          btn.textContent = chip.name;
+          btn.onclick = () => focusSelectCategory(chip.value);
+          container.appendChild(btn);
+        });
+      } else {
+        const projects = getProjects();
+        if (projects.length === 0) {
+          const empty = document.createElement('span');
+          empty.style.cssText = 'font-size:12px;color:var(--text3)';
+          empty.textContent   = 'No projects yet.';
+          container.appendChild(empty);
+        } else {
+          projects.forEach(p => {
+            const btn = document.createElement('button');
+            btn.className = 'focus-cat-chip' + (TIMER.category === p.name ? ' active' : '');
+            btn.textContent = p.name;
+            btn.style.borderColor = TIMER.category === p.name ? p.color : '';
+            btn.style.color       = TIMER.category === p.name ? p.color : '';
+            btn.onclick = () => focusSelectCategory(p.name);
+            container.appendChild(btn);
+          });
+        }
+      }
+    }
+
+    // ── Select category ───────────────────────────────
+    function focusSelectCategory(name) {
+      TIMER.category = name;
+      TIMER.subject  = name; // keep legacy field in sync
+      renderCategoryChips();
+      updateConfigBarSummary();
+
+      // Auto-select matching tag if subject mode
+      if (TIMER.categoryMode === 'subject') {
+        const tags = getFocusTags();
+        const studyTag    = tags.find(t => /study/i.test(t.name));
+        const businessTag = tags.find(t => /business|yt|youtube/i.test(t.name));
+        if ((name === 'Study' || name === 'Study') && studyTag) {
+          focusSelectTag(studyTag);
+        } else if ((name === 'Business/YT') && businessTag) {
+          focusSelectTag(businessTag);
+        }
+      }
+    }
+
+    // ── Project inline add ────────────────────────────
+    function focusToggleProjectAddForm() {
+      const form = document.getElementById('focus-project-add-form');
+      form.classList.toggle('open');
+      if (form.classList.contains('open')) {
+        document.getElementById('focus-project-name-input').focus();
+      }
+    }
+
+    function focusAddProject() {
+      const nameInput  = document.getElementById('focus-project-name-input');
+      const colorInput = document.getElementById('focus-project-color-input');
+      const name  = (nameInput?.value || '').trim();
+      const color = colorInput?.value || '#a8a8bc';
+      if (!name) return;
+      const projects = getProjects();
+      projects.push({ id: 'proj_' + Date.now(), name, color });
+      saveProjects(projects);
+      nameInput.value = '';
+      document.getElementById('focus-project-add-form').classList.remove('open');
+      renderCategoryChips();
+      focusSelectCategory(name);
     }
 
   </script>
