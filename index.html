@@ -1687,6 +1687,7 @@
 
     /* ── Today hero bottom margin ── */
     .today-hero { margin-bottom: 28px; }
+    #today-page-tagline { margin-bottom: 16px; }
 
     /* ── Quote bottom padding ── */
     .today-quote-wrap { padding: 32px 0 32px; }
@@ -1964,6 +1965,163 @@
       margin-top: 1px;
     }
 
+    /* ═══════════════════════════════════════════
+       STAGE 7 — ANALYTICS DEPTH + NARRATIVE + ONBOARDING
+    ═══════════════════════════════════════════ */
+
+    /* ── 6-card metrics grid (Today page) ── */
+    .today-metrics-6 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    /* ── Subject bar chart rows (Analytics + Weekly) ── */
+    .subject-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .subject-bar-row:last-child { border-bottom: none; }
+    .subject-bar-name {
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 500;
+      min-width: 110px;
+      flex-shrink: 0;
+    }
+    .subject-bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--bg4);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+    .subject-bar-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+      transition: width 0.6s ease;
+    }
+    .subject-bar-val {
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
+      min-width: 60px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ── Weekly Narrative Card ── */
+    .weekly-narrative-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    .weekly-narrative-week-label {
+      font-size: 11px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .weekly-narrative-text {
+      font-size: 15px;
+      color: var(--text);
+      font-weight: 500;
+      line-height: 1.5;
+      margin-top: 6px;
+    }
+    .weekly-narrative-sub {
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 4px;
+    }
+
+    /* ── Onboarding Card ── */
+    .onboarding-card {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 28px;
+      position: relative;
+      transition: opacity 0.3s ease;
+    }
+    .onboarding-card.fading { opacity: 0; }
+    .onboarding-card-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .onboarding-card-body {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .onboarding-dismiss-x {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 18px;
+      color: var(--text3);
+      background: none;
+      border: none;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .onboarding-dismiss-x:hover { color: var(--text); }
+    .onboarding-got-it-btn {
+      padding: 10px 20px;
+      background: var(--bg4);
+      border: 1px solid var(--border3);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .onboarding-got-it-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+
+    /* ── All Pillars Complete Banner ── */
+    .pillars-complete-banner {
+      font-size: 13px;
+      color: var(--green);
+      text-align: center;
+      padding: 12px;
+      background: rgba(92,184,122,0.06);
+      border: 1px solid rgba(92,184,122,0.15);
+      border-radius: var(--radius-md);
+      margin-bottom: 12px;
+      display: none;
+    }
+    .pillars-complete-banner.visible { display: block; }
+
+    /* ── Subject breakdown sub-heading in weekly ── */
+    .review-subject-sub-heading {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin: 18px 0 6px;
+    }
+
+    /* ── Mobile: 2-col metrics ── */
+    @media (max-width: 640px) {
+      .today-metrics-6 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -2044,6 +2202,7 @@
           <div class="today-date-line" id="today-date-line"></div>
           <div class="today-greeting"  id="today-greeting"></div>
           <span class="today-streak"   id="today-streak"></span>
+          <p class="page-tagline" id="today-page-tagline"></p>
           <div class="today-intention-label">Today's Intention</div>
           <input
             type="text"
@@ -2055,8 +2214,11 @@
           <span class="today-intention-saved" id="today-intention-saved">Saved</span>
         </section>
 
+        <!-- ONBOARDING CARD (shown only on first use) -->
+        <div id="onboarding-card-wrap"></div>
+
         <!-- SECTION 2: METRICS ROW -->
-        <div class="today-metrics" id="today-metrics"></div>
+        <div class="today-metrics-6" id="today-metrics"></div>
 
         <!-- SECTION 2.5: INSIGHT CARD -->
         <div class="today-insight-card" id="today-insight-card">
@@ -2065,6 +2227,7 @@
         </div>
 
         <!-- SECTION 3: THREE PILLARS -->
+        <div id="pillars-complete-banner" class="pillars-complete-banner">All three pillars complete today. 🏆</div>
         <div id="today-pillars"></div>
 
         <!-- SECTION 4: HABIT TRACKER -->
@@ -2251,6 +2414,9 @@
         <!-- ── SUB-SECTION A: WEEKLY ── -->
         <div id="review-weekly-section">
 
+          <!-- A0: Weekly Narrative -->
+          <div id="review-weekly-narrative"></div>
+
           <!-- A1: Week Navigator -->
           <div class="review-week-nav">
             <button class="review-week-arrow" onclick="shiftWeek(-1)">‹</button>
@@ -2282,9 +2448,9 @@
             <div id="review-days-list"></div>
           </div>
 
-          <!-- A5: Focus by Tag -->
+          <!-- A5: Focus by Tag & Subject -->
           <div class="pillar-card">
-            <div class="pillar-header"><span class="pillar-name">Focus by Tag</span></div>
+            <div class="pillar-header"><span class="pillar-name">Focus by Tag &amp; Subject</span></div>
             <div class="pillar-divider"></div>
             <div id="review-tag-breakdown"></div>
           </div>
@@ -2296,6 +2462,13 @@
 
           <!-- B1: All-Time Stats -->
           <div class="today-metrics review-metrics-grid" id="review-alltime-metrics"></div>
+
+          <!-- B1b: Hours by Subject -->
+          <div class="pillar-card" id="review-subject-hours-card">
+            <div class="pillar-header"><span class="pillar-name">Hours by Subject — All Time</span></div>
+            <div class="pillar-divider"></div>
+            <div id="review-subject-hours-list"></div>
+          </div>
 
           <!-- B4: Consistency Score (placed before heatmap for visual weight) -->
           <div class="review-consistency-card" id="review-consistency-card">
@@ -2860,6 +3033,7 @@
        initTodayPage — entry point
     ───────────────────────────────────────────────── */
     function initTodayPage() {
+      renderOnboardingCard();
       renderGreeting();
       loadIntention();
       calculateStreak();
@@ -2868,6 +3042,7 @@
       renderPillars();
       renderHabits();
       loadQuote();
+      checkAllPillarsComplete();
     }
 
     /* ─────────────────────────────────────────────────
@@ -2879,6 +3054,25 @@
       const name = getUsername();
       const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
       document.getElementById('today-greeting').textContent = name ? `${greet}, ${name}.` : `${greet}.`;
+
+      // E1: dynamic tagline
+      const taglineEl = document.getElementById('today-page-tagline');
+      if (taglineEl) {
+        const dow = new Date().getDay(); // 0=Sun,1=Mon,...,5=Fri
+        const streakObj = JSON.parse(localStorage.getItem('dos_streak') || '{"count":0}');
+        const streakN   = typeof streakObj === 'object' ? (streakObj.count || 0) : parseInt(streakObj) || 0;
+        let tagline = 'Your daily command center.';
+        if (dow === 1) {
+          tagline = 'New week. New standard.';
+        } else if (dow === 5) {
+          tagline = 'End the week strong.';
+        } else if (streakN >= 7) {
+          tagline = `You're on a ${streakN}-day streak. Don't stop.`;
+        } else if (streakN >= 3) {
+          tagline = `Day ${streakN} of your streak.`;
+        }
+        taglineEl.textContent = tagline;
+      }
     }
 
     /* ─────────────────────────────────────────────────
@@ -2942,7 +3136,17 @@
       const today    = getTodayKey();
       const sessions = JSON.parse(localStorage.getItem('dos_sessions') || '[]');
 
-      // Focus today (seconds)
+      // Study today
+      const studySec = sessions
+        .filter(s => s.date === today && s.completed && s.subject === 'Study')
+        .reduce((acc, s) => acc + (s.duration || 0), 0);
+
+      // Business/YT today
+      const businessSec = sessions
+        .filter(s => s.date === today && s.completed && s.subject === 'Business/YT')
+        .reduce((acc, s) => acc + (s.duration || 0), 0);
+
+      // Focus today (all)
       const todaySec = sessions
         .filter(s => s.date === today && s.completed)
         .reduce((acc, s) => acc + (s.duration || 0), 0);
@@ -2961,14 +3165,24 @@
 
       document.getElementById('today-metrics').innerHTML = `
         <div class="metric-card">
-          <div class="metric-label">Focus Today</div>
-          <div class="metric-value">${formatMinutes(todaySec)}</div>
-          <div class="metric-sub">of focus</div>
+          <div class="metric-label">Study Today</div>
+          <div class="metric-value">${formatMinutes(studySec)}</div>
+          <div class="metric-sub">study</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Business Today</div>
+          <div class="metric-value">${formatMinutes(businessSec)}</div>
+          <div class="metric-sub">business / YT</div>
         </div>
         <div class="metric-card">
           <div class="metric-label">Habits Done</div>
           <div class="metric-value${allHabitsDone && totalHabits > 0 ? ' all-done' : ''}">${doneHabits} / ${totalHabits}</div>
           <div class="metric-sub">habits complete</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Focus Today</div>
+          <div class="metric-value">${formatMinutes(todaySec)}</div>
+          <div class="metric-sub">total focus</div>
         </div>
         <div class="metric-card">
           <div class="metric-label">Day Streak</div>
@@ -3097,6 +3311,7 @@
 
       renderMetrics();
       renderInsightCard();
+      checkAllPillarsComplete();
       syncPushDailyData(today);
     }
 
@@ -3966,6 +4181,9 @@
     // ── renderWeeklySection ───────────────────────────
 
     function renderWeeklySection() {
+      // C: Weekly Narrative
+      renderWeeklyNarrative(weekOffset);
+
       // A1: week navigator label & arrow state
       document.getElementById('review-week-label').textContent = getWeekLabel(weekOffset);
       const nextBtn = document.getElementById('review-week-next');
@@ -4051,6 +4269,25 @@
       });
       const total = Object.values(tagMap).reduce((a, t) => a + t.sec, 0);
       const sorted = Object.entries(tagMap).sort((a, b) => b[1].sec - a[1].sec);
+
+      // B3: subject breakdown rows HTML
+      const subjectMap = {};
+      sessions.forEach(s => {
+        const subj = s.subject || 'Study';
+        subjectMap[subj] = (subjectMap[subj] || 0) + (s.duration || 0);
+      });
+      const subjSorted  = Object.entries(subjectMap).sort((a, b) => b[1] - a[1]);
+      const subjMaxSec  = subjSorted.length > 0 ? subjSorted[0][1] : 1;
+      const subjRowsHTML = subjSorted.map(([subj, sec]) => {
+        const pct = subjMaxSec > 0 ? Math.round((sec / subjMaxSec) * 100) : 0;
+        return `
+          <div class="subject-bar-row">
+            <div class="subject-bar-name">${escHtml(subj)}</div>
+            <div class="subject-bar-track"><div class="subject-bar-fill" style="width:${pct}%"></div></div>
+            <div class="subject-bar-val">${fmtSecsLong(sec)}</div>
+          </div>`;
+      }).join('');
+
       container.innerHTML = sorted.map(([name, data]) => {
         const pct = total > 0 ? Math.round((data.sec / total) * 100) : 0;
         return `
@@ -4060,7 +4297,10 @@
             <div class="review-tag-dur">${fmtSecs(data.sec)}</div>
             <div class="review-tag-pct">${pct}%</div>
           </div>`;
-      }).join('');
+      }).join('') + `
+        <div class="review-subject-sub-heading">By Subject</div>
+        ${subjRowsHTML}
+      `;
     }
 
     // ── Weekly Goals ──────────────────────────────────
@@ -4183,6 +4423,9 @@
 
       // B4: Consistency
       renderConsistency(all, todayKey);
+
+      // B1b: Subject hours all-time
+      renderSubjectHoursAllTime();
 
       // B2: Heatmap
       renderHeatmap(all, todayKey);
@@ -4731,6 +4974,7 @@
           if (d.dos_streak         != null) localStorage.setItem('dos_streak',         typeof d.dos_streak         === 'string' ? d.dos_streak         : JSON.stringify(d.dos_streak));
           if (d.dos_quote          != null && d.dos_quote !== '') localStorage.setItem('dos_quote', d.dos_quote);
           if (d.dos_projects       != null && d.dos_projects !== '') localStorage.setItem('dos_projects', typeof d.dos_projects === 'string' ? d.dos_projects : JSON.stringify(d.dos_projects));
+          if (d.dos_onboarded      === 'true') localStorage.setItem('dos_onboarded', 'true');
         }
 
         // Pull sessions
@@ -4903,7 +5147,8 @@
           dos_pomo_settings:          localStorage.getItem('dos_pomo_settings') || '',
           dos_streak:                 localStorage.getItem('dos_streak') || '',
           dos_quote:                  localStorage.getItem('dos_quote') || '',
-          dos_projects:               localStorage.getItem('dos_projects') || ''
+          dos_projects:               localStorage.getItem('dos_projects') || '',
+          dos_onboarded:              localStorage.getItem('dos_onboarded') || ''
         };
 
         await supa.from('dos_settings').upsert({
@@ -4915,6 +5160,181 @@
         console.warn('[DailyOS] syncPushSettings error:', err);
         // Silent
       }
+    }
+
+    /* ══════════════════════════════════════════════════
+       STAGE 7 — NEW FUNCTIONS
+    ══════════════════════════════════════════════════ */
+
+    /* ── D: Onboarding ─────────────────────────────── */
+    function renderOnboardingCard() {
+      const wrap = document.getElementById('onboarding-card-wrap');
+      if (!wrap) return;
+      if (localStorage.getItem('dos_onboarded') === 'true') {
+        wrap.innerHTML = '';
+        return;
+      }
+      wrap.innerHTML = `
+        <div class="onboarding-card" id="onboarding-card">
+          <button class="onboarding-dismiss-x" onclick="dismissOnboarding()" aria-label="Dismiss">×</button>
+          <div class="onboarding-card-title">Welcome to Daily OS 🔱</div>
+          <div class="onboarding-card-body">Daily OS tracks your life across three pillars — Career, Physical, and Spiritual. Each day, check off your pillar goals, log focus sessions, and track your habits. Your streak grows every day you show up. Everything syncs across all your devices.</div>
+          <button class="onboarding-got-it-btn" onclick="dismissOnboarding()">Got it, let's go →</button>
+        </div>
+      `;
+    }
+
+    function dismissOnboarding() {
+      const card = document.getElementById('onboarding-card');
+      if (!card) return;
+      card.classList.add('fading');
+      setTimeout(() => {
+        const wrap = document.getElementById('onboarding-card-wrap');
+        if (wrap) wrap.innerHTML = '';
+      }, 300);
+      localStorage.setItem('dos_onboarded', 'true');
+      syncPushSettings();
+    }
+
+    /* ── E2: All Pillars Complete Banner ─────────────── */
+    function checkAllPillarsComplete() {
+      const today  = getTodayKey();
+      const banner = document.getElementById('pillars-complete-banner');
+      if (!banner) return;
+      const allDone = PILLARS.every(pillar => {
+        const items = getPillarItems(pillar.id);
+        return items.length > 0 && items.every(item =>
+          localStorage.getItem(`dos_pillar_${pillar.id}_${item.id}_${today}`) === 'true'
+        );
+      });
+      banner.classList.toggle('visible', allDone);
+    }
+
+    /* ── B2: Subject Hours Bar Chart (all-time) ──────── */
+    function renderSubjectHoursAllTime() {
+      const container = document.getElementById('review-subject-hours-list');
+      if (!container) return;
+      const all = getAllSessions();
+      if (all.length === 0) {
+        container.innerHTML = `<div class="review-empty-msg" style="font-size:13px;color:var(--text3);padding:12px 0">Complete some sessions to see subject breakdown.</div>`;
+        return;
+      }
+      const subjectMap = {};
+      all.forEach(s => {
+        const subj = s.subject || 'Study';
+        subjectMap[subj] = (subjectMap[subj] || 0) + (s.duration || 0);
+      });
+      const sorted = Object.entries(subjectMap).sort((a, b) => b[1] - a[1]);
+      const maxSec = sorted[0][1];
+      container.innerHTML = sorted.map(([subj, sec]) => {
+        const pct = maxSec > 0 ? Math.round((sec / maxSec) * 100) : 0;
+        return `
+          <div class="subject-bar-row">
+            <div class="subject-bar-name">${escHtml(subj)}</div>
+            <div class="subject-bar-track"><div class="subject-bar-fill" style="width:${pct}%"></div></div>
+            <div class="subject-bar-val">${fmtSecsLong(sec)}</div>
+          </div>`;
+      }).join('');
+    }
+
+    /* ── B3: Subject Hours for a specific week ─────── */
+    function renderSubjectHoursForWeek(sessions, containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      if (sessions.length === 0) {
+        container.innerHTML = `<div class="review-empty-msg" style="font-size:13px;color:var(--text3);padding:8px 0">No sessions this week.</div>`;
+        return;
+      }
+      const subjectMap = {};
+      sessions.forEach(s => {
+        const subj = s.subject || 'Study';
+        subjectMap[subj] = (subjectMap[subj] || 0) + (s.duration || 0);
+      });
+      const sorted = Object.entries(subjectMap).sort((a, b) => b[1] - a[1]);
+      const maxSec = sorted[0][1];
+      container.innerHTML = sorted.map(([subj, sec]) => {
+        const pct = maxSec > 0 ? Math.round((sec / maxSec) * 100) : 0;
+        return `
+          <div class="subject-bar-row">
+            <div class="subject-bar-name">${escHtml(subj)}</div>
+            <div class="subject-bar-track"><div class="subject-bar-fill" style="width:${pct}%"></div></div>
+            <div class="subject-bar-val">${fmtSecsLong(sec)}</div>
+          </div>`;
+      }).join('');
+    }
+
+    /* ── C: Weekly Narrative ─────────────────────────── */
+    function generateWeekNarrative(offset) {
+      const weekSessions = getSessionsForWeek(offset);
+      const prevSessions = getSessionsForWeek(offset - 1);
+
+      const totalSec  = weekSessions.reduce((a, s) => a + (s.duration || 0), 0);
+      const prevSec   = prevSessions.reduce((a, s) => a + (s.duration || 0), 0);
+      const totalHrs  = totalSec / 3600;
+      const sessCount = weekSessions.length;
+
+      // Top subject
+      const subjectMap = {};
+      weekSessions.forEach(s => {
+        const subj = s.subject || 'Study';
+        subjectMap[subj] = (subjectMap[subj] || 0) + (s.duration || 0);
+      });
+      const topSubject = Object.keys(subjectMap).length > 0
+        ? Object.entries(subjectMap).sort((a, b) => b[1] - a[1])[0][0]
+        : 'Study';
+
+      const isCurrentWeek = offset === 0;
+      const dow = new Date().getDay();
+      const isMonday = dow === 1;
+
+      // Narrative text
+      let narrative;
+      if (isCurrentWeek && totalSec === 0 && isMonday) {
+        narrative = 'The week is just starting. Make it count.';
+      } else if (totalSec === 0) {
+        narrative = 'No sessions logged this week.';
+      } else if (totalHrs >= 20) {
+        narrative = `Exceptional week. ${Math.round(totalHrs)}h of focused work logged.`;
+      } else if (totalHrs >= 10) {
+        narrative = `Strong week. ${Math.round(totalHrs)}h logged across ${sessCount} sessions.`;
+      } else if (totalHrs >= 5) {
+        narrative = `Solid week. ${Math.round(totalHrs)}h of focus with ${topSubject} leading.`;
+      } else {
+        narrative = `${fmtSecsLong(totalSec)} logged this week. Keep building the habit.`;
+      }
+
+      // Sub-line comparison
+      let subColor = 'var(--text3)';
+      let subLine;
+      if (prevSec === 0) {
+        subLine = 'No data from the previous week.';
+      } else if (totalSec > prevSec * 1.1) {
+        const pct = Math.round(((totalSec - prevSec) / prevSec) * 100);
+        subLine = `↑ Up ${pct}% from last week`;
+        subColor = 'var(--green)';
+      } else if (totalSec < prevSec * 0.9) {
+        const pct = Math.round(((prevSec - totalSec) / prevSec) * 100);
+        subLine = `↓ Down ${pct}% from last week`;
+        subColor = 'var(--red)';
+      } else {
+        subLine = '→ Similar to last week';
+      }
+
+      return { narrative, subLine, subColor };
+    }
+
+    function renderWeeklyNarrative(offset) {
+      const container = document.getElementById('review-weekly-narrative');
+      if (!container) return;
+      const weekLabel = getWeekLabel(offset);
+      const { narrative, subLine, subColor } = generateWeekNarrative(offset);
+      container.innerHTML = `
+        <div class="weekly-narrative-card">
+          <div class="weekly-narrative-week-label">${escHtml(weekLabel)}</div>
+          <div class="weekly-narrative-text">${escHtml(narrative)}</div>
+          <div class="weekly-narrative-sub" style="color:${subColor}">${escHtml(subLine)}</div>
+        </div>
+      `;
     }
 
     /* ── renderInsightCard (Part C) ── */
@@ -5062,7 +5482,7 @@
         const tags = getFocusTags();
         const studyTag    = tags.find(t => /study/i.test(t.name));
         const businessTag = tags.find(t => /business|yt|youtube/i.test(t.name));
-        if ((name === 'Study' || name === 'Study') && studyTag) {
+        if (name === 'Study' && studyTag) {
           focusSelectTag(studyTag);
         } else if ((name === 'Business/YT') && businessTag) {
           focusSelectTag(businessTag);
