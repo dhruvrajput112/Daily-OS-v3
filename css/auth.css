@@ -1,0 +1,626 @@
+/**
+ * @file auth.css
+ * @description Authentication screen styles — animated ring logo,
+ *              sign in / sign up tabs, two-panel desktop layout,
+ *              form fields, error and success states.
+ *              All on the premium dark aesthetic.
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUTH SCREEN WRAPPER
+   Full-screen overlay shown before any app content loads.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.auth-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  z-index: 9999;
+  overflow: hidden;
+  /* Fade out on successful login */
+  transition: opacity 400ms ease;
+}
+
+.auth-screen--exit {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LEFT PANEL — Branding (desktop only, hidden on mobile)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.auth-left {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 60px 64px;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle gradient mesh background on left panel */
+.auth-left::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 30% 40%, rgba(168, 168, 188, 0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 70% 80%, rgba(155, 143, 212, 0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* Grid texture overlay */
+.auth-left::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .auth-left {
+    display: flex;
+    max-width: 480px;
+    border-right: 1px solid var(--border);
+  }
+}
+
+/* Brand area */
+.auth-brand {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.auth-brand__logo {
+  position: relative;
+  width: 56px;
+  height: 56px;
+}
+
+/* Animated ring logo SVG */
+.auth-ring {
+  width: 56px;
+  height: 56px;
+}
+
+.auth-ring__track {
+  fill: none;
+  stroke: var(--bg3);
+  stroke-width: 2;
+}
+
+.auth-ring__arc {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 100 56;
+  animation: ring-rotate 3s linear infinite;
+  transform-origin: 28px 28px;
+}
+
+.auth-ring__arc--spiritual {
+  stroke: var(--spiritual);
+  stroke-dasharray: 40 116;
+  stroke-dashoffset: 60;
+  animation-direction: reverse;
+  animation-duration: 5s;
+}
+
+.auth-ring__arc--physical {
+  stroke: var(--physical);
+  stroke-dasharray: 25 131;
+  stroke-dashoffset: 100;
+  animation-duration: 7s;
+}
+
+@keyframes ring-rotate {
+  to { transform: rotate(360deg); }
+}
+
+.auth-brand__wordmark {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  color: var(--text);
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.auth-brand__tagline {
+  font-size: 15px;
+  color: var(--text2);
+  line-height: 1.6;
+  max-width: 300px;
+}
+
+/* Feature list */
+.auth-features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.auth-feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text2);
+}
+
+.auth-feature__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.auth-feature:nth-child(1) .auth-feature__dot { background: var(--career); }
+.auth-feature:nth-child(2) .auth-feature__dot { background: var(--physical); }
+.auth-feature:nth-child(3) .auth-feature__dot { background: var(--spiritual); }
+
+/* Version tag */
+.auth-version {
+  position: absolute;
+  bottom: 32px;
+  left: 64px;
+  font-size: 11px;
+  color: var(--text4);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RIGHT PANEL — Form
+   Full-width on mobile, right half on desktop.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.auth-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px var(--page-h-pad);
+  padding-top: calc(env(safe-area-inset-top) + 40px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 40px);
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Mobile-only logo area — visible when left panel is hidden */
+.auth-mobile-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.auth-mobile-logo .auth-ring {
+  width: 44px;
+  height: 44px;
+}
+
+.auth-mobile-logo__name {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  color: var(--text);
+}
+
+@media (min-width: 768px) {
+  .auth-mobile-logo {
+    display: none;
+  }
+
+  .auth-right {
+    max-width: 440px;
+    margin: 0 auto;
+  }
+}
+
+/* Form card container */
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ─── Tab switcher: Sign In / Sign Up ───────────────────────────────────── */
+
+.auth-tabs {
+  display: flex;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 4px;
+  gap: 4px;
+}
+
+.auth-tab {
+  flex: 1;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: calc(var(--r-md) - 4px);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  transition: background var(--t-micro), color var(--t-micro);
+}
+
+.auth-tab:active {
+  transform: scale(0.97);
+}
+
+.auth-tab--active {
+  background: var(--bg5);
+  color: var(--text);
+}
+
+/* ─── Form header ───────────────────────────────────────────────────────── */
+
+.auth-form-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-form-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.auth-form-subtitle {
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+/* ─── Form fields ───────────────────────────────────────────────────────── */
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Re-use .field-group and .field-label from components.css */
+/* Auth-specific field overrides */
+
+.auth-field-input {
+  width: 100%;
+  height: 50px;
+  padding: 0 16px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-md);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--text);
+  transition: border-color var(--t-micro), background var(--t-micro);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.auth-field-input::placeholder {
+  color: var(--text3);
+}
+
+.auth-field-input:focus {
+  outline: none;
+  border-color: var(--accent-dim);
+  background: var(--bg4);
+}
+
+.auth-field-input--error {
+  border-color: rgba(200, 112, 112, 0.6);
+  background: rgba(200, 112, 112, 0.04);
+}
+
+/* Password field wrapper (for show/hide toggle) */
+.auth-password-wrap {
+  position: relative;
+  display: flex;
+}
+
+.auth-password-wrap .auth-field-input {
+  padding-right: 48px;
+}
+
+.auth-password-toggle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 50px;
+  width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text3);
+  cursor: pointer;
+  transition: color var(--t-micro);
+}
+
+.auth-password-toggle:hover {
+  color: var(--text2);
+}
+
+/* ─── Status messages ───────────────────────────────────────────────────── */
+
+.auth-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  line-height: 1.5;
+  /* Hidden by default */
+  display: none;
+}
+
+.auth-message--visible {
+  display: flex;
+}
+
+.auth-message--error {
+  background: rgba(200, 112, 112, 0.10);
+  border: 1px solid rgba(200, 112, 112, 0.22);
+  color: var(--red);
+}
+
+.auth-message--success {
+  background: rgba(92, 184, 122, 0.10);
+  border: 1px solid rgba(92, 184, 122, 0.22);
+  color: var(--green);
+}
+
+.auth-message--info {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+}
+
+.auth-message__icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ─── Submit button ─────────────────────────────────────────────────────── */
+
+.auth-submit {
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  border: none;
+  transition: background var(--t-micro), transform var(--t-micro), opacity var(--t-micro);
+}
+
+.auth-submit:hover {
+  background: var(--accent-light);
+}
+
+.auth-submit:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.auth-submit:disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* Loading state within button */
+.auth-submit--loading {
+  pointer-events: none;
+}
+
+.auth-submit--loading .auth-submit__label {
+  opacity: 0;
+}
+
+.auth-submit--loading::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(8, 8, 8, 0.3);
+  border-top-color: var(--bg);
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
+}
+
+/* ─── Divider with text ─────────────────────────────────────────────────── */
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text3);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ─── Forgot password / footer links ───────────────────────────────────── */
+
+.auth-footer {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+.auth-footer a,
+.auth-link {
+  color: var(--accent);
+  cursor: pointer;
+  font-weight: 500;
+  transition: color var(--t-micro);
+}
+
+.auth-footer a:hover,
+.auth-link:hover {
+  color: var(--accent-light);
+}
+
+/* ─── Legal/terms footnote ──────────────────────────────────────────────── */
+
+.auth-legal {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text3);
+  line-height: 1.6;
+  padding: 0 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ONBOARDING STEP (shown after first sign-up before main app)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.auth-onboard {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+  max-width: 380px;
+}
+
+.auth-onboard__step-indicator {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.auth-onboard__step-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bg4);
+  transition: background var(--t-micro), width var(--t-micro);
+}
+
+.auth-onboard__step-dot--active {
+  background: var(--accent);
+  width: 18px;
+  border-radius: var(--r-pill);
+}
+
+.auth-onboard__heading {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--text);
+  text-align: center;
+}
+
+.auth-onboard__subheading {
+  font-size: 14px;
+  color: var(--text2);
+  text-align: center;
+  line-height: 1.6;
+  margin-top: -12px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AMBIENT / FULL-SCREEN LOADING STATE
+   Shown while Supabase session is being verified on first load.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.auth-loading-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 10000;
+  transition: opacity 300ms ease;
+}
+
+.auth-loading-screen--exit {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.auth-loading-ring {
+  width: 48px;
+  height: 48px;
+  animation: ring-rotate 2s linear infinite;
+}
+
+.auth-loading-label {
+  font-size: 13px;
+  color: var(--text3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE TWEAKS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 380px) {
+  .auth-brand__wordmark {
+    font-size: 26px;
+  }
+
+  .auth-form-title {
+    font-size: 20px;
+  }
+
+  .auth-right {
+    padding: 32px 16px;
+  }
+}
+
+@media (min-width: 768px) {
+  .auth-right {
+    padding: 60px 64px;
+  }
+
+  .auth-card {
+    max-width: 360px;
+  }
+}

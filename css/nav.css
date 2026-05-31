@@ -1,0 +1,455 @@
+/**
+ * @file nav.css
+ * @description Bottom navigation tab bar, floating active-session banner,
+ *              and tablet sidebar nav layout. Safe-area-inset aware.
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SESSION BANNER
+   Floating strip at the TOP of the screen when a timer/stopwatch is active.
+   Visible on ALL pages. Tapping navigates to the Timer page.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.session-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Respect iOS status bar */
+  padding-top: env(safe-area-inset-top);
+  z-index: var(--z-banner);
+  pointer-events: none;
+  /* Hidden by default — JS adds .session-banner--visible */
+  transform: translateY(-100%);
+  transition: transform var(--t-page);
+}
+
+.session-banner--visible {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Inner pill — centered, floats on top of content */
+.session-banner__inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  margin: 8px var(--page-h-pad) 0;
+  padding: 0 14px;
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background var(--t-micro);
+}
+
+.session-banner__inner:active {
+  background: var(--bg5);
+}
+
+/* Pulsing dot — indicates live session */
+.session-banner__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  animation: banner-pulse 2s ease-in-out infinite;
+}
+
+/* Mode-colored dot variants */
+.session-banner__dot--timer     { background: var(--accent); }
+.session-banner__dot--stopwatch { background: var(--green); }
+.session-banner__dot--pomodoro  { background: var(--spiritual); }
+
+@keyframes banner-pulse {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* Mode label */
+.session-banner__label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text2);
+  flex-shrink: 0;
+}
+
+/* Running time — monospaced so digits don't jump */
+.session-banner__time {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  flex: 1;
+}
+
+/* Tag label — right-aligned, truncated */
+.session-banner__tag {
+  font-size: 12px;
+  color: var(--text2);
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+}
+
+/* Sync status indicator — sits at far right of banner */
+.session-banner__sync {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.session-banner__sync--syncing {
+  /* Re-use spinner border technique but tiny */
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--border3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
+}
+
+.session-banner__sync--synced {
+  /* Subtle green checkmark via background — color dot */
+  background: var(--green);
+  opacity: 0.7;
+}
+
+.session-banner__sync--offline {
+  background: var(--red);
+  animation: offline-blink 1.5s step-end infinite;
+}
+
+@keyframes offline-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BOTTOM TAB BAR (mobile)
+   Fixed to the bottom. 5 tabs: Today · Timer · Weekly · Analytics · Me
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(64px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  padding-top: 8px;
+  z-index: var(--z-nav);
+  /* Subtle blur backdrop — feels native */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  /* Override bg with semi-transparent so blur shows through */
+  background: rgba(8, 8, 8, 0.88);
+}
+
+/* Each tab button */
+.bnav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+  padding: 0 4px;
+  cursor: pointer;
+  /* Generous touch target — tap area extends the full 64px height */
+  min-height: 52px;
+  justify-content: flex-start;
+  padding-top: 0;
+  transition: opacity var(--t-micro);
+  position: relative;
+}
+
+.bnav-item:active {
+  opacity: 0.7;
+}
+
+/* Icon wrapper */
+.bnav-icon {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text3);
+  transition: color var(--t-micro), transform var(--t-micro);
+}
+
+.bnav-item--active .bnav-icon {
+  color: var(--accent);
+  transform: scale(1.08);
+}
+
+/* Page-specific active accent colors */
+.bnav-item--active[data-page='today']     .bnav-icon { color: var(--accent); }
+.bnav-item--active[data-page='timer']     .bnav-icon { color: var(--green); }
+.bnav-item--active[data-page='weekly']    .bnav-icon { color: var(--career); }
+.bnav-item--active[data-page='analytics'] .bnav-icon { color: var(--yellow); }
+.bnav-item--active[data-page='me']        .bnav-icon { color: var(--spiritual); }
+
+/* Label */
+.bnav-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--text3);
+  transition: color var(--t-micro);
+  line-height: 1;
+}
+
+.bnav-item--active .bnav-label {
+  color: var(--accent);
+}
+
+.bnav-item--active[data-page='today']     .bnav-label { color: var(--accent); }
+.bnav-item--active[data-page='timer']     .bnav-label { color: var(--green); }
+.bnav-item--active[data-page='weekly']    .bnav-label { color: var(--career); }
+.bnav-item--active[data-page='analytics'] .bnav-label { color: var(--yellow); }
+.bnav-item--active[data-page='me']        .bnav-label { color: var(--spiritual); }
+
+/* Active dot indicator — 4px dot below the icon */
+.bnav-dot {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity var(--t-micro), transform var(--t-micro);
+  transform-origin: center;
+}
+
+.bnav-item--active .bnav-dot {
+  opacity: 1;
+}
+
+/* Match dot color to page */
+.bnav-item--active[data-page='today']     .bnav-dot { background: var(--accent); }
+.bnav-item--active[data-page='timer']     .bnav-dot { background: var(--green); }
+.bnav-item--active[data-page='weekly']    .bnav-dot { background: var(--career); }
+.bnav-item--active[data-page='analytics'] .bnav-dot { background: var(--yellow); }
+.bnav-item--active[data-page='me']        .bnav-dot { background: var(--spiritual); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TABLET / DESKTOP — LEFT SIDEBAR NAV
+   Replaces bottom nav at min-width: 768px.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 768px) {
+
+  /* Hide the mobile bottom nav */
+  .bottom-nav {
+    display: none;
+  }
+
+  /* App shell becomes a horizontal flex row on tablet */
+  #app {
+    flex-direction: row;
+  }
+
+  /* Sidebar rail */
+  .sidebar-nav {
+    width: 220px;
+    flex-shrink: 0;
+    background: rgba(8, 8, 8, 0.92);
+    border-right: 1px solid var(--border);
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding: calc(env(safe-area-inset-top) + 20px) 12px 24px;
+    gap: 4px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: var(--z-nav);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* Logo / wordmark at top of sidebar */
+  .sidebar-nav__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+
+  .sidebar-nav__brand-ring {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    flex-shrink: 0;
+  }
+
+  .sidebar-nav__brand-name {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    font-family: var(--font-serif);
+  }
+
+  /* Sidebar nav items */
+  .sidebar-nav__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 44px;
+    padding: 0 12px;
+    border-radius: var(--r-md);
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 500;
+    transition: background var(--t-micro), color var(--t-micro);
+  }
+
+  .sidebar-nav__item:hover {
+    background: var(--bg3);
+    color: var(--text);
+  }
+
+  .sidebar-nav__item:active {
+    transform: scale(0.98);
+  }
+
+  .sidebar-nav__item-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+  }
+
+  .sidebar-nav__item-label {
+    flex: 1;
+    color: inherit;
+  }
+
+  /* Active state */
+  .sidebar-nav__item--active {
+    background: var(--bg3);
+    color: var(--text);
+  }
+
+  .sidebar-nav__item--active[data-page='today'] {
+    color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  .sidebar-nav__item--active[data-page='timer'] {
+    color: var(--green);
+    background: rgba(92, 184, 122, 0.08);
+  }
+
+  .sidebar-nav__item--active[data-page='weekly'] {
+    color: var(--career);
+    background: rgba(168, 168, 188, 0.08);
+  }
+
+  .sidebar-nav__item--active[data-page='analytics'] {
+    color: var(--yellow);
+    background: rgba(200, 168, 74, 0.08);
+  }
+
+  .sidebar-nav__item--active[data-page='me'] {
+    color: var(--spiritual);
+    background: rgba(155, 143, 212, 0.08);
+  }
+
+  /* Active left-edge accent strip */
+  .sidebar-nav__item--active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+    border-radius: 0 var(--r-pill) var(--r-pill) 0;
+    background: currentColor;
+  }
+
+  .sidebar-nav__item {
+    position: relative;
+  }
+
+  /* Spacer pushes bottom items down */
+  .sidebar-nav__spacer {
+    flex: 1;
+  }
+
+  /* Sidebar sync status at bottom */
+  .sidebar-nav__sync {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    height: 36px;
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  /* Pages need left margin to clear sidebar on tablet */
+  .page {
+    left: 220px;
+    padding-top: calc(env(safe-area-inset-top) + 16px);
+    padding-bottom: 40px;
+  }
+
+  /* Session banner on tablet — inside the content area */
+  .session-banner {
+    left: 220px;
+  }
+
+  /* Toast container shifts for sidebar */
+  .toast-container {
+    left: calc(220px + 50%);
+    transform: translateX(-50%);
+    bottom: 24px;
+  }
+}
+
+/* Extra-wide sidebar at large desktop */
+@media (min-width: 1200px) {
+  .sidebar-nav {
+    width: 260px;
+  }
+
+  .page {
+    left: 260px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .session-banner {
+    left: 260px;
+  }
+}
