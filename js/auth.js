@@ -367,7 +367,8 @@ export async function handleLogout() {
   if ($appLoading) $appLoading.classList.add('hidden');
 
   // ── FIX: was classList.remove('auth--hidden') ──
-  $authScreen.classList.remove('hidden');
+  if ($appLoading) $appLoading.classList.add('hidden');
+$authScreen.classList.remove('hidden');
 
   switchTab(TAB_SIGNIN);
   $authScreen.querySelectorAll('.auth__input').forEach((input) => {
