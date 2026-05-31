@@ -9,7 +9,7 @@ import { upsertDailyLog } from './supabase.js';
 import { syncWrite } from './sync.js';
 import { vibrate, HAPTIC_TICK, HAPTIC_COMPLETE, HAPTIC_ADD } from './haptics.js';
 import { attachSwipeToComplete } from './gestures.js';
-import { navigateTo } from './nav.js';
+import { showPage } from './nav.js';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -932,7 +932,7 @@ function buildPillarBlock(pillar, { onlyOne }) {
     const link = document.createElement('button');
     link.className = 'pillar-block__nav-link';
     link.textContent = 'Open practice →';
-    link.addEventListener('click', () => navigateTo('spiritual'));
+    link.addEventListener('click', () => showPage('spiritual'));
     body.appendChild(link);
   }
 
