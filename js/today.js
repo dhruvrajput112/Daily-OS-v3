@@ -1153,3 +1153,8 @@ export function refreshToday() {
   // Full re-render keeps it simple and bug-free.
   initToday();
 }
+// Auto-init when authenticated app is ready, refresh on page revisit
+window.addEventListener('daily-os:ready', () => initToday());
+window.addEventListener('daily-os:page-shown', (e) => {
+  if (e.detail?.page === TODAY_PAGE_ID) refreshToday();
+});
