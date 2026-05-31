@@ -1,0 +1,834 @@
+/* =============================================================================
+   today.css
+   All styles for the Today page — hero, focus bar, metrics, wins, todos,
+   pillar blocks, and inline fields.
+   Depends on: tokens.css (CSS variables), components.css (base card/button)
+   ============================================================================= */
+
+/* ─── Page scroll container ──────────────────────────────────────────────────── */
+
+.page-scroll {
+  padding: 24px var(--page-h-pad) var(--page-bottom-pad);
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-gap);
+  min-height: 100%;
+}
+
+/* ─── Hero / Greeting ────────────────────────────────────────────────────────── */
+
+.today-hero {
+  padding: 8px 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.today-hero__greeting {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(22px, 6vw, 30px);
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.2;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.today-hero__date {
+  font-size: 13px;
+  color: var(--text2);
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+/* ─── Streak badge ───────────────────────────────────────────────────────────── */
+
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  padding: 4px 10px 4px 8px;
+  background: rgba(200, 140, 60, 0.12);
+  border: 1px solid rgba(200, 140, 60, 0.2);
+  border-radius: var(--r-pill);
+  color: #c89a50;
+  font-size: 12px;
+  font-weight: 500;
+  width: fit-content;
+}
+
+.streak-badge__icon {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+/* ─── Focus bar ──────────────────────────────────────────────────────────────── */
+
+.focus-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: var(--card-pad);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+}
+
+.focus-bar__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.focus-bar__label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.focus-bar__time {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.focus-bar__track {
+  height: 5px;
+  background: var(--bg4);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+
+.focus-bar__fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--r-pill);
+  transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 0;
+}
+
+/* ─── Metric cards grid ──────────────────────────────────────────────────────── */
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--card-pad);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  min-height: 72px;
+  justify-content: center;
+}
+
+.metric-card__label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.metric-card__value {
+  font-family: 'DM Serif Display', serif;
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+/* Wider screens: single row of 4 */
+@media (min-width: 480px) {
+  .metrics-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ─── Today section wrapper ──────────────────────────────────────────────────── */
+
+.today-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.today-section__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.today-section__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
+/* ─── Wins row ───────────────────────────────────────────────────────────────── */
+
+.wins-section {
+  overflow: hidden;
+}
+
+.wins-row {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  /* Hide scrollbar across browsers */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.wins-row::-webkit-scrollbar {
+  display: none;
+}
+
+.wins-row__empty {
+  font-size: 13px;
+  color: var(--text3);
+  padding: 8px 0;
+}
+
+/* ─── Win chips ──────────────────────────────────────────────────────────────── */
+
+.win-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 14px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-pill);
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+  /* 44px touch target minimum via parent padding */
+  min-height: 44px;
+  line-height: 1;
+}
+
+.win-chip:active {
+  background: var(--bg4);
+  transform: scale(0.97);
+}
+
+.win-chip--achieved {
+  background: rgba(168, 168, 188, 0.12);
+  border-color: var(--accent-dim);
+  color: var(--accent-light);
+}
+
+.win-chip--achieved::before {
+  content: '✓ ';
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+/* ─── To-Do list ─────────────────────────────────────────────────────────────── */
+
+.todo-section {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--card-pad);
+  gap: 0;
+}
+
+.todo-section .today-section__header {
+  margin-bottom: 12px;
+}
+
+.todo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ─── Todo item ──────────────────────────────────────────────────────────────── */
+
+.todo-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-md);
+  background: var(--bg2);
+  /* Swipe animation target */
+  transition: transform 80ms linear;
+}
+
+/* Swipe reveal background */
+.todo-item__swipe-bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(92, 184, 122, 0.12);
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 100ms ease;
+}
+
+.todo-item__swipe-check {
+  color: var(--green);
+  font-size: 18px;
+  font-weight: 700;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+/* Show swipe affordance when being swiped — JS adds .is-swiping */
+.todo-item.is-swiping .todo-item__swipe-bg {
+  opacity: 1;
+}
+
+.todo-item.is-swiping .todo-item__swipe-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Content row sits above swipe bg */
+.todo-item__row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 6px;
+  min-height: 44px;
+  background: transparent;
+  z-index: 1;
+}
+
+/* Check circle button */
+.todo-item__check {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  /* Extend touch target */
+  padding: 9px;
+  margin: -9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 150ms ease, transform 100ms ease;
+  border-radius: 50%;
+}
+
+.todo-item__check .icon {
+  width: 20px;
+  height: 20px;
+}
+
+.todo-item__check:active {
+  transform: scale(0.88);
+}
+
+.todo-item--completed .todo-item__check {
+  color: var(--green);
+}
+
+/* Text */
+.todo-item__text {
+  flex: 1;
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.35;
+  word-break: break-word;
+  transition: color 200ms ease, opacity 200ms ease;
+}
+
+.todo-item--completed .todo-item__text {
+  color: var(--text3);
+  text-decoration: line-through;
+  text-decoration-color: var(--text3);
+  opacity: 0.6;
+}
+
+/* Delete button */
+.todo-item__delete {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  opacity: 0;
+  transition: opacity 150ms ease, color 150ms ease;
+}
+
+.todo-item__delete .icon {
+  width: 15px;
+  height: 15px;
+}
+
+/* Show delete on hover (desktop) — always visible on touch */
+@media (hover: hover) {
+  .todo-item:hover .todo-item__delete {
+    opacity: 1;
+  }
+}
+
+@media (hover: none) {
+  .todo-item__delete {
+    opacity: 0.45;
+  }
+}
+
+.todo-item__delete:active {
+  color: var(--red);
+}
+
+/* ─── Slide-off animation for swipe complete ─────────────────────────────────── */
+
+.todo-item.slide-off {
+  transform: translateX(110%) !important;
+  opacity: 0;
+  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 260ms ease;
+  pointer-events: none;
+}
+
+/* ─── Add task row ───────────────────────────────────────────────────────────── */
+
+.todo-add-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.todo-add-row__input {
+  flex: 1;
+  height: 40px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-md);
+  padding: 0 12px;
+  font-size: 14px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color 150ms ease;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.todo-add-row__input::placeholder {
+  color: var(--text3);
+}
+
+.todo-add-row__input:focus {
+  border-color: var(--border3);
+}
+
+.todo-add-row__btn {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-md);
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 150ms ease, transform 100ms ease;
+}
+
+.todo-add-row__btn .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.todo-add-row__btn:active {
+  background: var(--bg5);
+  transform: scale(0.94);
+}
+
+/* ─── Pillars section ────────────────────────────────────────────────────────── */
+
+.pillars-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ─── Pillar block ───────────────────────────────────────────────────────────── */
+
+.pillar-block {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  transition: border-color 200ms ease;
+}
+
+.pillar-block--career  { --pillar-color: var(--career);   }
+.pillar-block--physical { --pillar-color: var(--physical); }
+.pillar-block--spiritual { --pillar-color: var(--spiritual); }
+
+.pillar-block--expanded {
+  border-color: rgba(255, 255, 255, 0.09);
+}
+
+/* ── Pillar header ─ */
+
+.pillar-block__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px var(--card-pad);
+  cursor: pointer;
+  min-height: 52px;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pillar-block__header:active {
+  background: var(--bg3);
+}
+
+/* Pillar accent dot */
+.pillar-block__dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--pillar-color);
+  opacity: 0.85;
+}
+
+/* Title */
+.pillar-block__title {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+/* X/Y done count */
+.pillar-block__count {
+  font-size: 12px;
+  color: var(--text2);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Chevron */
+.pillar-block__chevron {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text3);
+  transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms ease;
+}
+
+.pillar-block__chevron .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.pillar-block--expanded .pillar-block__chevron {
+  transform: rotate(180deg);
+  color: var(--text2);
+}
+
+/* "All done" flash label */
+.pillar-block__all-done {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--green);
+  letter-spacing: 0.04em;
+  animation: fade-in-up 200ms ease forwards;
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Pillar body (collapsed / expanded) ─ */
+
+.pillar-block__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 var(--card-pad);
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 280ms cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 200ms ease,
+              padding 280ms ease;
+}
+
+.pillar-block--expanded .pillar-block__body {
+  max-height: 800px;
+  opacity: 1;
+  padding: 4px var(--card-pad) 16px;
+}
+
+/* ─── Habit check rows ───────────────────────────────────────────────────────── */
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  min-height: 44px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+
+.check-row:last-of-type {
+  border-bottom: none;
+}
+
+/* Hide native checkbox */
+.check-row__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Custom checkbox box */
+.check-row__box {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border3);
+  background: var(--bg3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 150ms ease, border-color 150ms ease;
+  position: relative;
+}
+
+.check-row__box--checked {
+  background: var(--pillar-color, var(--accent));
+  border-color: var(--pillar-color, var(--accent));
+}
+
+.check-row__box--checked::after {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 9px;
+  border: 2px solid #080808;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+
+/* Checkbox label text */
+.check-row__label {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.check-row__input:checked ~ .check-row__label {
+  color: var(--text2);
+  text-decoration: line-through;
+  text-decoration-color: var(--text3);
+}
+
+/* ─── Inline fields (number inputs inside pillar body) ───────────────────────── */
+
+.inline-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  min-height: 44px;
+}
+
+.inline-field:last-child {
+  border-bottom: none;
+}
+
+.inline-field--text {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.inline-label {
+  font-size: 13px;
+  color: var(--text2);
+  font-weight: 500;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.inline-input {
+  width: 88px;
+  height: 36px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-md);
+  padding: 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  outline: none;
+  transition: border-color 150ms ease;
+  user-select: text;
+  -webkit-user-select: text;
+  /* Remove number spinners */
+  -moz-appearance: textfield;
+}
+
+.inline-input::-webkit-inner-spin-button,
+.inline-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.inline-input::placeholder {
+  color: var(--text3);
+  font-weight: 400;
+}
+
+.inline-input:focus {
+  border-color: var(--accent-dim);
+}
+
+/* Textarea variant for custom text fields */
+.inline-textarea {
+  width: 100%;
+  min-height: 64px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  line-height: 1.45;
+  resize: vertical;
+  outline: none;
+  transition: border-color 150ms ease;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.inline-textarea::placeholder {
+  color: var(--text3);
+}
+
+.inline-textarea:focus {
+  border-color: var(--accent-dim);
+}
+
+/* ─── Spiritual "Open practice" link ─────────────────────────────────────────── */
+
+.pillar-block__nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--spiritual);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  opacity: 0.85;
+  transition: opacity 150ms ease;
+  min-height: 44px;
+}
+
+.pillar-block__nav-link:active {
+  opacity: 0.6;
+}
+
+/* ─── Responsive tweaks ──────────────────────────────────────────────────────── */
+
+/* Tablet and up: more generous padding */
+@media (min-width: 768px) {
+  .page-scroll {
+    padding: 32px 24px var(--page-bottom-pad);
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .today-hero__greeting {
+    font-size: 34px;
+  }
+
+  .metric-card__value {
+    font-size: 30px;
+  }
+
+  .pillar-block__title {
+    font-size: 16px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+  .metrics-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .metric-card__value {
+    font-size: 22px;
+  }
+
+  .win-chip {
+    font-size: 12px;
+    padding: 0 11px;
+  }
+}
