@@ -10,30 +10,24 @@ import { STATE } from './state.js';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const AUTH_SCREEN_ID      = 'auth-screen';
-const APP_SHELL_ID        = 'app-shell';
-const APP_LOADING_ID      = 'app-loading';
+const AUTH_SCREEN_ID     = 'auth-screen';
+const APP_SHELL_ID       = 'app-shell';
+const APP_LOADING_ID     = 'app-loading';
 
-const TAB_SIGNIN          = 'signin';
-const TAB_SIGNUP          = 'signup';
+const TAB_SIGNIN         = 'signin';
+const TAB_SIGNUP         = 'signup';
 
-const ERROR_DISPLAY_MS    = 4000;   // How long inline errors remain visible
-const SUCCESS_DISPLAY_MS  = 6000;   // How long the "check your email" message stays
+const ERROR_DISPLAY_MS   = 4000;
+const SUCCESS_DISPLAY_MS = 6000;
 
-// ─── Module-level DOM refs (populated in initAuth) ────────────────────────────
+// ─── Module-level DOM refs ────────────────────────────────────────────────────
 
-let $authScreen   = null;
-let $appShell     = null;
-let $appLoading   = null;
+let $authScreen = null;
+let $appShell   = null;
+let $appLoading = null;
 
 // ─── HTML Template ────────────────────────────────────────────────────────────
 
-/**
- * Build and return the complete auth screen HTML string.
- * No user-generated content is interpolated here — safe to use innerHTML.
- *
- * @returns {string} Static HTML for the auth screen.
- */
 function buildAuthHTML() {
   return `
     <div class="auth__inner">
@@ -60,7 +54,6 @@ function buildAuthHTML() {
         >Sign Up</button>
       </div>
 
-      <!-- Sign In Panel -->
       <div class="auth__panel auth__panel--active" id="auth-panel-signin" role="tabpanel">
         <div class="auth__field">
           <label class="auth__label" for="signin-email">Email</label>
@@ -87,7 +80,6 @@ function buildAuthHTML() {
         <button class="auth__submit" id="signin-submit">Sign In</button>
       </div>
 
-      <!-- Sign Up Panel -->
       <div class="auth__panel" id="auth-panel-signup" role="tabpanel">
         <div class="auth__field">
           <label class="auth__label" for="signup-name">Display Name</label>
@@ -130,12 +122,6 @@ function buildAuthHTML() {
 
 // ─── Tab Switching ────────────────────────────────────────────────────────────
 
-/**
- * Switch the visible auth tab and its associated panel.
- *
- * @param {string} tabName - Either 'signin' or 'signup'.
- * @returns {void}
- */
 function switchTab(tabName) {
   const tabs   = $authScreen.querySelectorAll('.auth__tab');
   const panels = $authScreen.querySelectorAll('.auth__panel');
@@ -151,35 +137,19 @@ function switchTab(tabName) {
     panel.classList.toggle('auth__panel--active', isActive);
   });
 
-  // Clear all feedback messages when switching tabs
   clearFeedback(TAB_SIGNIN);
   clearFeedback(TAB_SIGNUP);
 }
 
 // ─── Feedback Helpers ─────────────────────────────────────────────────────────
 
-/**
- * Display an inline feedback message inside the specified tab's panel.
- *
- * @param {string} tabName  - 'signin' or 'signup'.
- * @param {string} message  - The human-readable message to display.
- * @param {'error'|'success'} type - Controls styling class applied.
- * @returns {void}
- */
 function showFeedback(tabName, message, type) {
   const el = $authScreen.querySelector(`#${tabName}-feedback`);
   if (!el) return;
-
   el.textContent = message;
   el.className = `auth__feedback auth__feedback--${type} auth__feedback--visible`;
 }
 
-/**
- * Clear the feedback element for a given tab.
- *
- * @param {string} tabName - 'signin' or 'signup'.
- * @returns {void}
- */
 function clearFeedback(tabName) {
   const el = $authScreen.querySelector(`#${tabName}-feedback`);
   if (!el) return;
@@ -189,99 +159,71 @@ function clearFeedback(tabName) {
 
 // ─── Loading State ────────────────────────────────────────────────────────────
 
-/**
- * Put a submit button into a loading (disabled + spinner label) state.
- *
- * @param {HTMLButtonElement} btn  - The button element to update.
- * @param {boolean}           loading - True to show loading, false to restore.
- * @param {string}            defaultLabel - The button's original label.
- * @returns {void}
- */
 function setButtonLoading(btn, loading, defaultLabel) {
-  btn.disabled = loading;
-  btn.textContent = loading ? 'Please wait…' : defaultLabel;
+  btn.disabled     = loading;
+  btn.textContent  = loading ? 'Please wait…' : defaultLabel;
   btn.classList.toggle('auth__submit--loading', loading);
 }
 
-// ─── Map Supabase error messages to friendly strings ─────────────────────────
+// ─── Friendly Error Messages ──────────────────────────────────────────────────
 
-/**
- * Translate a raw Supabase/GoTrue error message into user-friendly copy.
- *
- * @param {string} raw - The raw error message string from Supabase.
- * @returns {string} A friendly message suitable for display.
- */
 function friendlyError(raw) {
   if (!raw) return 'Something went wrong. Please try again.';
   const lower = raw.toLowerCase();
-
-  if (lower.includes('invalid login') || lower.includes('invalid credentials')) {
+  if (lower.includes('invalid login') || lower.includes('invalid credentials'))
     return 'Incorrect email or password.';
-  }
-  if (lower.includes('email not confirmed')) {
+  if (lower.includes('email not confirmed'))
     return 'Please confirm your email before signing in.';
-  }
-  if (lower.includes('user already registered') || lower.includes('already been registered')) {
+  if (lower.includes('user already registered') || lower.includes('already been registered'))
     return 'An account with this email already exists. Try signing in.';
-  }
-  if (lower.includes('password should be')) {
+  if (lower.includes('password should be'))
     return 'Password must be at least 8 characters.';
-  }
-  if (lower.includes('unable to validate email')) {
+  if (lower.includes('unable to validate email'))
     return 'Please enter a valid email address.';
-  }
-  if (lower.includes('rate limit') || lower.includes('too many')) {
+  if (lower.includes('rate limit') || lower.includes('too many'))
     return 'Too many attempts. Please wait a moment and try again.';
-  }
   return raw;
 }
 
 // ─── Post-Login Bootstrap ─────────────────────────────────────────────────────
 
 /**
- * Called after a successful sign-in. Hides the auth screen, shows the loading
- * overlay, fetches all user data, populates STATE, then reveals the app shell.
- *
+ * Called after a successful sign-in. Hides the auth screen, fetches all user
+ * data, populates STATE, then reveals the app shell.
  * @returns {Promise<void>}
  */
 async function bootstrapApp() {
-  // Hide auth, show loading overlay
-  $authScreen.classList.add('auth--hidden');
-  if ($appLoading) $appLoading.classList.remove('app-loading--hidden');
+  // Hide auth screen — use 'hidden' to match index.html utility class
+  $authScreen.classList.add('hidden');
+  // Loading screen is already visible from the start — no action needed
 
   try {
     await fetchAllUserData();
   } catch (err) {
     console.error('[Auth] bootstrapApp — fetchAllUserData failed:', err);
-    // Non-fatal: app will still load, just with empty state
+    // Non-fatal: app loads with empty state
   }
 
-  // Hide loading, reveal the app shell
-  if ($appLoading) $appLoading.classList.add('app-loading--hidden');
-  if ($appShell)  $appShell.classList.remove('app-shell--hidden');
+  // ── FIX: was 'app-loading--hidden' / 'app-shell--hidden' — class mismatch ──
+  if ($appLoading) $appLoading.classList.add('hidden');
+  if ($appShell)   $appShell.classList.remove('hidden');
 
-  // Signal the rest of the app that the user is ready
+  // Signal the rest of the app that the authenticated user is ready
   window.dispatchEvent(new CustomEvent('daily-os:ready'));
 }
 
 // ─── Form Handlers ────────────────────────────────────────────────────────────
 
-/**
- * Handle the Sign In form submission.
- *
- * @returns {Promise<void>}
- */
 async function handleSignIn() {
-  const emailEl    = $authScreen.querySelector('#signin-email');
-  const passwordEl = $authScreen.querySelector('#signin-password');
-  const submitBtn  = $authScreen.querySelector('#signin-submit');
+  const emailEl   = $authScreen.querySelector('#signin-email');
+  const passEl    = $authScreen.querySelector('#signin-password');
+  const submitBtn = $authScreen.querySelector('#signin-submit');
 
   const email    = emailEl.value.trim();
-  const password = passwordEl.value;
+  const password = passEl.value;
 
   clearFeedback(TAB_SIGNIN);
 
-  // Basic client-side validation
   if (!email || !password) {
     showFeedback(TAB_SIGNIN, 'Please fill in all fields.', 'error');
     return;
@@ -291,16 +233,12 @@ async function handleSignIn() {
 
   try {
     const { error } = await signIn(email, password);
-
     if (error) {
       showFeedback(TAB_SIGNIN, friendlyError(error.message), 'error');
       setButtonLoading(submitBtn, false, 'Sign In');
       return;
     }
-
-    // Success — bootstrap the app (button stays disabled during load)
     await bootstrapApp();
-
   } catch (err) {
     console.error('[Auth] handleSignIn failed:', err);
     showFeedback(TAB_SIGNIN, 'Something went wrong. Please try again.', 'error');
@@ -308,24 +246,18 @@ async function handleSignIn() {
   }
 }
 
-/**
- * Handle the Sign Up form submission.
- *
- * @returns {Promise<void>}
- */
 async function handleSignUp() {
-  const nameEl     = $authScreen.querySelector('#signup-name');
-  const emailEl    = $authScreen.querySelector('#signup-email');
-  const passwordEl = $authScreen.querySelector('#signup-password');
-  const submitBtn  = $authScreen.querySelector('#signup-submit');
+  const nameEl    = $authScreen.querySelector('#signup-name');
+  const emailEl   = $authScreen.querySelector('#signup-email');
+  const passEl    = $authScreen.querySelector('#signup-password');
+  const submitBtn = $authScreen.querySelector('#signup-submit');
 
   const name     = nameEl.value.trim();
   const email    = emailEl.value.trim();
-  const password = passwordEl.value;
+  const password = passEl.value;
 
   clearFeedback(TAB_SIGNUP);
 
-  // Client-side validation
   if (!name || !email || !password) {
     showFeedback(TAB_SIGNUP, 'Please fill in all fields.', 'error');
     return;
@@ -339,29 +271,22 @@ async function handleSignUp() {
 
   try {
     const { error } = await signUp(email, password, name);
-
     if (error) {
       showFeedback(TAB_SIGNUP, friendlyError(error.message), 'error');
       setButtonLoading(submitBtn, false, 'Create Account');
       return;
     }
-
-    // Success — Supabase sends a confirmation email before the session is active
     showFeedback(
       TAB_SIGNUP,
       '✓ Check your email to confirm your account, then sign in.',
       'success'
     );
     setButtonLoading(submitBtn, false, 'Create Account');
-
-    // Auto-switch to sign-in tab after a short delay so the user sees the message
     setTimeout(() => {
       switchTab(TAB_SIGNIN);
-      // Pre-fill the email they just used
       const siEmail = $authScreen.querySelector('#signin-email');
       if (siEmail) siEmail.value = email;
     }, SUCCESS_DISPLAY_MS);
-
   } catch (err) {
     console.error('[Auth] handleSignUp failed:', err);
     showFeedback(TAB_SIGNUP, 'Something went wrong. Please try again.', 'error');
@@ -371,31 +296,17 @@ async function handleSignUp() {
 
 // ─── Event Wiring ─────────────────────────────────────────────────────────────
 
-/**
- * Attach all click and keyboard listeners to the rendered auth screen.
- *
- * @returns {void}
- */
 function wireEvents() {
-  // Tab buttons
   $authScreen.querySelectorAll('.auth__tab').forEach((btn) => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
-
-  // Submit buttons
-  $authScreen.querySelector('#signin-submit')
-    .addEventListener('click', handleSignIn);
-
-  $authScreen.querySelector('#signup-submit')
-    .addEventListener('click', handleSignUp);
-
-  // Allow Enter key to submit from any input inside a panel
+  $authScreen.querySelector('#signin-submit').addEventListener('click', handleSignIn);
+  $authScreen.querySelector('#signup-submit').addEventListener('click', handleSignUp);
   $authScreen.querySelectorAll('.auth__panel').forEach((panel) => {
     panel.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter') return;
-      const isSignin = panel.id === 'auth-panel-signin';
-      if (isSignin) handleSignIn();
-      else          handleSignUp();
+      if (panel.id === 'auth-panel-signin') handleSignIn();
+      else handleSignUp();
     });
   });
 }
@@ -403,10 +314,8 @@ function wireEvents() {
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
- * Initialise the auth module. Call this once on app startup (before any other
- * page module is initialised). Checks for an existing session: if one is found,
+ * Initialise the auth module. Checks for an existing session: if found,
  * immediately bootstraps the app; otherwise renders the auth screen.
- *
  * @returns {Promise<void>}
  */
 export async function initAuth() {
@@ -419,15 +328,12 @@ export async function initAuth() {
     return;
   }
 
-  // Render the auth UI into the container
   $authScreen.innerHTML = buildAuthHTML();
   wireEvents();
 
-  // Check for an existing Supabase session (e.g. after a page refresh)
   try {
     const user = await getUser();
     if (user) {
-      // Already logged in — skip the auth screen entirely
       await bootstrapApp();
       return;
     }
@@ -435,13 +341,12 @@ export async function initAuth() {
     console.error('[Auth] initAuth — session check failed:', err);
   }
 
-  // No active session — show the auth screen
-  $authScreen.classList.remove('auth--hidden');
+  // ── FIX: was classList.remove('auth--hidden') — wrong class ──
+  $authScreen.classList.remove('hidden');
 }
 
 /**
  * Sign the current user out, clear STATE, and show the auth screen again.
- *
  * @returns {Promise<void>}
  */
 export async function handleLogout() {
@@ -451,23 +356,26 @@ export async function handleLogout() {
     console.error('[Auth] handleLogout — signOut failed:', err);
   }
 
-  // Reset global state
   if (STATE && typeof STATE === 'object') {
     Object.keys(STATE).forEach((key) => {
-      // Preserve primitive defaults where possible
       STATE[key] = Array.isArray(STATE[key]) ? [] : null;
     });
   }
 
-  // Hide the app shell, show auth screen
-  if ($appShell)  $appShell.classList.add('app-shell--hidden');
-  if ($appLoading) $appLoading.classList.add('app-loading--hidden');
+  // ── FIX: was 'app-shell--hidden' ──
+  if ($appShell)   $appShell.classList.add('hidden');
+  if ($appLoading) $appLoading.classList.add('hidden');
 
-  $authScreen.classList.remove('auth--hidden');
+  // ── FIX: was classList.remove('auth--hidden') ──
+  $authScreen.classList.remove('hidden');
 
-  // Reset to sign-in tab and clear all inputs
   switchTab(TAB_SIGNIN);
   $authScreen.querySelectorAll('.auth__input').forEach((input) => {
     input.value = '';
   });
 }
+
+// ─── Auto-init ────────────────────────────────────────────────────────────────
+// FIX: initAuth() was exported but never called. Adding this call here means
+// the module bootstraps itself the moment the browser loads it.
+initAuth().catch((err) => console.error('[Auth] top-level init failed:', err));
