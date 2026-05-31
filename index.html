@@ -19,21 +19,24 @@
 
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json" />
-
-  <!-- Apple Touch Icon -->
   <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 
-  <!-- CSS — loaded in dependency order.
+  <!-- ─── CSS — loaded in dependency order ─────────
        tokens first (variables), then global components,
        then per-page styles.
-       NOTE: weekly.css, analytics.css, spiritual.css, settings.css
-       are added here once those files are uploaded. -->
+       IMPORTANT: filenames must EXACTLY match GitHub (case-sensitive on Vercel).
+       Uncomment each line as you upload that page's CSS file.
+       ─────────────────────────────────────────────── -->
   <link rel="stylesheet" href="/css/tokens.css" />
   <link rel="stylesheet" href="/css/components.css" />
   <link rel="stylesheet" href="/css/auth.css" />
   <link rel="stylesheet" href="/css/nav.css" />
   <link rel="stylesheet" href="/css/today.css" />
   <link rel="stylesheet" href="/css/timer.css" />
+  <!-- <link rel="stylesheet" href="/css/weekly.css" />     — uncomment when weekly.css is uploaded -->
+  <!-- <link rel="stylesheet" href="/css/analytics.css" />  — uncomment when analytics.css is uploaded -->
+  <!-- <link rel="stylesheet" href="/css/spiritual.css" />  — uncomment when spiritual.css is uploaded -->
+  <!-- <link rel="stylesheet" href="/css/settings.css" />   — uncomment when settings.css is uploaded -->
 
   <!-- Google Fonts: DM Serif Display + DM Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -48,6 +51,75 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+  <!-- ═══════════════════════════════════════════════
+       DEBUG ERROR OVERLAY
+       Catches JS errors and module load failures.
+       Shows a red banner on screen so you can see
+       what broke without opening DevTools.
+       Remove this block once the app is stable.
+       ═══════════════════════════════════════════════ -->
+  <div id="error-overlay" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: #c87070;
+    color: #fff;
+    padding: 14px 16px 14px 16px;
+    z-index: 99999;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 60vh;
+    overflow-y: auto;
+    border-bottom: 2px solid #a85050;
+  "></div>
+
+  <!-- Error capture — MUST be a regular script (not type=module)
+       so it runs before modules and can catch their errors. -->
+  <script>
+    (function () {
+      var overlay = document.getElementById('error-overlay');
+      var msgs = [];
+
+      function showError(msg) {
+        msgs.push(msg);
+        overlay.style.display = 'block';
+        overlay.textContent = '⚠ JS Error — tap to dismiss\n\n' + msgs.join('\n─────────────────\n');
+        overlay.onclick = function () { overlay.style.display = 'none'; };
+      }
+
+      // Catches runtime errors in modules and regular scripts
+      window.addEventListener('error', function (e) {
+        var file = e.filename ? e.filename.replace(location.origin, '') : '(unknown file)';
+        showError('Error: ' + e.message + '\nFile: ' + file + ' line ' + e.lineno);
+      });
+
+      // Catches unhandled promise rejections (very common in async module code)
+      window.addEventListener('unhandledrejection', function (e) {
+        var reason = e.reason
+          ? (e.reason.message || String(e.reason))
+          : 'Unknown promise rejection';
+        showError('Unhandled Promise: ' + reason);
+      });
+
+      // Fallback: if nothing has hidden the loading screen after 8 seconds,
+      // the module graph probably failed silently (e.g. a 404 on a dependency).
+      // Surface a hint so you know to check the browser Console > Network tab.
+      setTimeout(function () {
+        var loader = document.getElementById('app-loading');
+        if (loader && !loader.classList.contains('hidden')) {
+          showError(
+            'Loading timeout — a JS module likely returned 404.\n' +
+            'Open browser DevTools → Console or Network tab to find the failing file.\n' +
+            'Common causes: wrong filename capitalisation, missing file on GitHub.'
+          );
+        }
+      }, 8000);
+    })();
+  </script>
 
   <!-- ═══════════════════════════════════════════════
        APP LOADING SCREEN
@@ -92,8 +164,6 @@
     </div>
 
     <!-- ─── PAGES ─────────────────────────────────── -->
-    <!-- All pages are rendered empty. JS modules inject content. -->
-
     <main id="pages-container" class="pages-container">
 
       <section
@@ -147,8 +217,8 @@
     </main>
 
     <!-- ─── BOTTOM NAV ────────────────────────────── -->
-    <!-- Tablet: hidden; sidebar rendered by nav.js instead -->
     <nav id="bottom-nav" class="bottom-nav" role="navigation" aria-label="Main navigation">
+
       <button
         class="bottom-nav__tab bottom-nav__tab--active"
         data-page="today"
@@ -216,6 +286,7 @@
         <span class="bottom-nav__label">Me</span>
         <span class="bottom-nav__dot" aria-hidden="true"></span>
       </button>
+
     </nav>
 
   </div><!-- /app-shell -->
@@ -247,7 +318,6 @@
   <!-- ═══════════════════════════════════════════════
        TOAST — single reusable toast notification
        Managed by nav.js: showToast(message, type)
-       Types: 'success' | 'error' | 'info'
        ═══════════════════════════════════════════════ -->
   <div id="toast" class="toast hidden" role="alert" aria-live="assertive" aria-atomic="true">
     <span class="toast__message" id="toast-message"></span>
@@ -268,27 +338,39 @@
 
   <!-- ═══════════════════════════════════════════════
        JS MODULES — loaded in dependency order.
-       Only files that exist on the server are listed here.
-       Add weekly.js, analytics.js, spiritual.js, settings.js
-       once those files are uploaded.
+
+       CRITICAL RULE: Every filename here must EXACTLY match
+       the filename on GitHub — Vercel (Linux) is case-sensitive.
+       A single wrong capital letter causes a silent 404 that
+       breaks the entire module graph.
+
+       Current files: config, state, supabase, haptics, gestures,
+       sync, auth, nav, timer-state, timer-html, timer, today.
+
+       Uncomment each line below as you upload that page's JS file.
        ═══════════════════════════════════════════════ -->
   <script type="module" src="/js/config.js"></script>
   <script type="module" src="/js/state.js"></script>
   <script type="module" src="/js/supabase.js"></script>
   <script type="module" src="/js/haptics.js"></script>
   <script type="module" src="/js/gestures.js"></script>
-  <script type="module" src="/js/Sync.js"></script>
+  <script type="module" src="/js/sync.js"></script><!-- ← FIX: was "Sync.js" — capital S caused 404 on Vercel -->
   <script type="module" src="/js/auth.js"></script>
   <script type="module" src="/js/nav.js"></script>
   <script type="module" src="/js/timer-state.js"></script>
+  <script type="module" src="/js/timer-html.js"></script>
   <script type="module" src="/js/timer.js"></script>
   <script type="module" src="/js/today.js"></script>
+  <!-- <script type="module" src="/js/weekly.js"></script>     — uncomment when weekly.js is uploaded -->
+  <!-- <script type="module" src="/js/analytics.js"></script>  — uncomment when analytics.js is uploaded -->
+  <!-- <script type="module" src="/js/spiritual.js"></script>  — uncomment when spiritual.js is uploaded -->
+  <!-- <script type="module" src="/js/settings.js"></script>   — uncomment when settings.js is uploaded -->
 
   <!-- Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js').catch((err) => {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/service-worker.js').catch(function (err) {
           console.warn('[SW] Registration failed:', err);
         });
       });
