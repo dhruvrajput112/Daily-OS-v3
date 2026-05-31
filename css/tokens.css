@@ -1,0 +1,268 @@
+/**
+ * @file tokens.css
+ * @description All design tokens (CSS custom properties), Google Fonts imports,
+ *              and mandatory global native-app rules for Daily OS v2.
+ */
+
+/* ─── FONTS ────────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap');
+
+/* ─── DESIGN TOKENS ─────────────────────────────────────────────────────────── */
+:root {
+
+  /* Surfaces — layered from darkest (bg) to lightest (bg5) */
+  --bg:  #080808;
+  --bg2: #0e0e12;
+  --bg3: #14141a;
+  --bg4: #1c1c24;
+  --bg5: #24242e;
+
+  /* Accent — Silver (default theme) */
+  --accent:      #a8a8bc;
+  --accent-light: #c8c8d8;
+  --accent-dim:  #787888;
+  --accent-glow: rgba(168, 168, 188, 0.10);
+
+  /* Pillar identity colors — use ONLY for pillar-specific UI */
+  --career:    #a8a8bc;
+  --physical:  #5cb87a;
+  --spiritual: #9b8fd4;
+
+  /* Text scale */
+  --text:  #e8e8ec;
+  --text2: #7a7a8a;
+  --text3: #3e3e4e;
+  --text4: #28283a;
+
+  /* Borders */
+  --border:  rgba(255, 255, 255, 0.05);
+  --border2: rgba(255, 255, 255, 0.09);
+  --border3: rgba(255, 255, 255, 0.15);
+
+  /* Status / semantic */
+  --green:  #5cb87a;
+  --red:    #c87070;
+  --yellow: #c8a84a;
+
+  /* Border radius */
+  --r-sm:   8px;
+  --r-md:   12px;
+  --r-lg:   16px;
+  --r-xl:   20px;
+  --r-pill: 999px;
+
+  /* Spacing */
+  --page-h-pad:     16px;
+  --page-bottom-pad: 100px;
+  --card-pad:       16px;
+  --section-gap:    12px;
+
+  /* Touch target floor */
+  --touch-target: 44px;
+
+  /* Transitions */
+  --t-micro: 200ms ease;
+  --t-page:  300ms ease;
+
+  /* Typography */
+  --font-sans:  'DM Sans', sans-serif;
+  --font-serif: 'DM Serif Display', serif;
+
+  /* Z-index layers */
+  --z-base:    0;
+  --z-card:    10;
+  --z-banner:  100;
+  --z-nav:     200;
+  --z-modal:   300;
+  --z-toast:   400;
+
+  /* Accent theme overrides — applied via JS when user changes theme */
+  /* Gold */
+  --accent-gold:       #c8a84a;
+  --accent-gold-light: #dfc26e;
+  --accent-gold-dim:   #887538;
+  --accent-gold-glow:  rgba(200, 168, 74, 0.10);
+
+  /* Rose */
+  --accent-rose:       #c87090;
+  --accent-rose-light: #e08aaa;
+  --accent-rose-dim:   #885060;
+  --accent-rose-glow:  rgba(200, 112, 144, 0.10);
+
+  /* Sky */
+  --accent-sky:        #5a9fd4;
+  --accent-sky-light:  #78baec;
+  --accent-sky-dim:    #3a6f94;
+  --accent-sky-glow:   rgba(90, 159, 212, 0.10);
+
+  /* Sage */
+  --accent-sage:       #7ab87a;
+  --accent-sage-light: #96cc96;
+  --accent-sage-dim:   #4e7a4e;
+  --accent-sage-glow:  rgba(122, 184, 122, 0.10);
+}
+
+/* ─── GLOBAL NATIVE-APP RULES ───────────────────────────────────────────────── */
+
+/*
+ * These three rules are MANDATORY and must apply everywhere.
+ * They eliminate: tap highlight flash, 300ms tap delay, accidental text selection.
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Re-enable text input in fields */
+input,
+textarea,
+[contenteditable] {
+  user-select: text;
+  -webkit-user-select: text;
+  touch-action: auto; /* allow default scroll inside textareas */
+}
+
+html {
+  height: 100%;
+  /* Prevent font size inflation on orientation change (iOS Safari) */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+  overflow-x: hidden;
+}
+
+/* Prevent long-press context menu / magnifying glass on interactive elements */
+img,
+button,
+.card,
+.check-row,
+.tag-chip {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  user-drag: none;
+}
+
+/* ─── TYPOGRAPHY BASELINE ───────────────────────────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* ─── SCROLLBAR SUPPRESSION (webkit) ────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* ─── FOCUS RING — accessible but minimal ───────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ─── APP SHELL ──────────────────────────────────────────────────────────────── */
+
+#app {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Each page panel — stacked, only active is visible */
+.page {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 var(--page-h-pad) var(--page-bottom-pad);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-page);
+}
+
+.page--active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Top offset when session banner is visible */
+.page--has-banner {
+  padding-top: 52px;
+}
+
+/* ─── UTILITY CLASSES ────────────────────────────────────────────────────────── */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.text-accent   { color: var(--accent); }
+.text-career   { color: var(--career); }
+.text-physical { color: var(--physical); }
+.text-spiritual{ color: var(--spiritual); }
+.text-muted    { color: var(--text2); }
+.text-dim      { color: var(--text3); }
+
+.serif { font-family: var(--font-serif); }
