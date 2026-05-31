@@ -1,0 +1,508 @@
+/* ============================================================
+   timer.css
+   Timer page — Timer, Stopwatch, Pomodoro modes
+   Depends on: tokens.css, components.css
+   ============================================================ */
+
+/* ── Page wrapper ────────────────────────────────────────────── */
+#page-timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px var(--page-h-pad) var(--page-bottom-pad);
+  min-height: 100dvh;
+}
+
+/* ── Mode switcher ───────────────────────────────────────────── */
+.timer-mode-switcher {
+  display: flex;
+  gap: 4px;
+  background: var(--bg3);
+  border-radius: var(--r-pill);
+  padding: 3px;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.mode-pill {
+  flex: 1;
+  height: 36px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 200ms ease, color 200ms ease;
+  min-width: 44px;
+}
+
+.mode-pill--active {
+  background: var(--bg5);
+  color: var(--text);
+}
+
+/* ── Chip rows (tags + categories) ──────────────────────────── */
+.timer-chip-row {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.chip-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.chip-scroll::-webkit-scrollbar { display: none; }
+
+.tag-chip {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  background: var(--bg3);
+  color: var(--text2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 150ms ease, color 150ms ease, background 150ms ease;
+  white-space: nowrap;
+}
+
+.tag-chip--active {
+  border-color: var(--chip-color, var(--accent));
+  color: var(--chip-color, var(--accent));
+  background: color-mix(in srgb, var(--chip-color, var(--accent)) 10%, transparent);
+}
+
+/* ── SVG ring ────────────────────────────────────────────────── */
+.timer-ring-wrap {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 0 4px;
+  flex-shrink: 0;
+}
+
+.timer-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.timer-ring__track {
+  fill: none;
+  stroke: var(--bg4);
+  stroke-width: 10;
+}
+
+.timer-ring__progress {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 10;
+  stroke-linecap: round;
+  /* strokeDashoffset is driven by JS every tick */
+  transition: stroke-dashoffset 1000ms linear;
+}
+
+/* ── Time display ────────────────────────────────────────────── */
+.timer-time {
+  position: relative;
+  z-index: 1;
+  font-family: 'DM Serif Display', serif;
+  font-size: 48px;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+/* Stopwatch: larger numerals, ring is hidden so time stands alone */
+#panel-stopwatch ~ #timer-ring-wrap .timer-time,
+.sw-display {
+  font-size: 56px;
+  letter-spacing: -2px;
+}
+
+/* ── Duration chips ──────────────────────────────────────────── */
+.duration-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.duration-chip {
+  height: 36px;
+  min-width: 44px;
+  padding: 0 16px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+
+.duration-chip--active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.duration-custom-input {
+  height: 36px;
+  width: 64px;
+  padding: 0 10px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  text-align: center;
+  outline: none;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.duration-custom-input::-webkit-inner-spin-button,
+.duration-custom-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.duration-custom-input:focus { border-color: var(--accent); }
+.duration-custom-input::placeholder { color: var(--text3); }
+
+/* ── Timer panels ────────────────────────────────────────────── */
+.timer-panel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Controls row ────────────────────────────────────────────── */
+.timer-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.timer-btn {
+  height: 48px;
+  min-width: 100px;
+  padding: 0 24px;
+  border-radius: var(--r-pill);
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 150ms ease, transform 100ms ease;
+}
+.timer-btn:active { transform: scale(0.97); }
+
+/* Button variants — used by timer-btn and completion-sheet-btn */
+.btn-primary   { background: var(--accent); color: var(--bg); }
+.btn-secondary { background: var(--bg4);    color: var(--text); }
+.btn-ghost     { background: transparent;   color: var(--text2); border: 1.5px solid var(--border2); }
+.btn-danger    { background: var(--red);    color: #fff; }
+
+/* ── Pomodoro phase row ──────────────────────────────────────── */
+.pomo-phase-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 10px;
+}
+
+.pomo-phase-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.pomo-cycle-count {
+  font-size: 12px;
+  color: var(--text2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Pomodoro dots ───────────────────────────────────────────── */
+.pomo-dots {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.pomo-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bg4);
+  border: 1.5px solid var(--border2);
+  transition: background 300ms ease, border-color 300ms ease;
+}
+
+.pomo-dot--done {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ── Completion sheet ────────────────────────────────────────── */
+.completion-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 300;
+  background: var(--bg2);
+  border-top: 1px solid var(--border2);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  padding: 12px 24px calc(24px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transform: translateY(100%);
+  transition: transform 300ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.completion-sheet--open {
+  transform: translateY(0);
+}
+
+.completion-sheet__handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border3);
+  margin-bottom: 8px;
+}
+
+.completion-sheet__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1.5px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--accent);
+}
+
+.completion-sheet__title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text);
+  margin: 0;
+}
+
+.completion-sheet__sub {
+  font-size: 14px;
+  color: var(--text2);
+  margin: 0;
+}
+
+.completion-sheet__btn {
+  width: 100%;
+  max-width: 320px;
+  height: 50px;
+  border-radius: var(--r-pill);
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+}
+.completion-sheet__btn:active { opacity: 0.8; }
+
+.completion-sheet__btn--ghost {
+  background: transparent;
+  color: var(--text2);
+  border: 1.5px solid var(--border2);
+}
+
+/* ── Abandon / generic modal ─────────────────────────────────── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+.modal-backdrop.modal--open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal-sheet {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg2);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  border-top: 1px solid var(--border2);
+  padding: 24px 24px calc(24px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transform: translateY(40px);
+  transition: transform 200ms ease;
+}
+
+.modal--open .modal-sheet {
+  transform: translateY(0);
+}
+
+.modal-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  color: var(--text);
+  margin: 0;
+  text-align: center;
+}
+
+.modal-sub {
+  font-size: 14px;
+  color: var(--text2);
+  margin: 0;
+  text-align: center;
+}
+
+/* ── Recent sessions ─────────────────────────────────────────── */
+.recent-sessions-section {
+  width: 100%;
+  margin-top: 28px;
+}
+
+.section-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+
+.session-date-header {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 14px 0 6px;
+}
+
+.session-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  margin-bottom: 6px;
+  min-height: 44px;
+}
+
+.session-item__tag-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.session-item__label {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.session-item__duration {
+  font-size: 13px;
+  color: var(--text2);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.empty-hint {
+  font-size: 13px;
+  color: var(--text3);
+  text-align: center;
+  padding: 24px 0;
+}
+
+/* ── Toast ───────────────────────────────────────────────────── */
+.timer-toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 18px;
+  border-radius: var(--r-pill);
+  z-index: 400;
+  opacity: 0;
+  transition: opacity 200ms ease, transform 200ms ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.timer-toast--show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Tablet ──────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  #page-timer {
+    padding-top: 32px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .timer-ring-wrap { width: 260px; height: 260px; }
+  .timer-time      { font-size: 58px; }
+  .timer-btn       { min-width: 120px; }
+}
+
+/* ── Utility ─────────────────────────────────────────────────── */
+.hidden { display: none !important; }
